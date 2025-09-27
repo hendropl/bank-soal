@@ -21,3 +21,13 @@ type LoginCredential struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6"`
 }
+
+type RegisterCredential struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
+	Name     string `json:"name" validate:"required"`
+	Nim      string `json:"nim" validate:"required"`
+	Major    string `json:"major" validate:"required"`
+	Faculty  string `json:"faculty" validate:"required"`
+	Role     string `json:"role" gorm:"default:user"`
+}
