@@ -41,22 +41,20 @@ func ParseExpiry(s string) (time.Duration, error) {
 	return d, nil
 }
 
-func GenerateToken(user *model.User, expiryStr string) (string, time.Time, error) {
+func GenerateToken(user *model.User) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
+	expiryStr := os.Getenv("JWT_EXPIRED")
 	if secret == "" {
-		return "", time.Time{}, errors.New("JWT_SECRET is not set in environment")
+		return "", errors.New("JWT_SECRET is not set in environment")
 	}
 
-	if expiryStr == "" {
-		expiryStr = os.Getenv("JWT_EXPIRED")
-	}
 	if expiryStr == "" {
 		expiryStr = "7d"
 	}
 
 	duration, err := ParseExpiry(expiryStr)
 	if err != nil {
-		return "", time.Time{}, err
+		return "", err
 	}
 
 	expireAt := time.Now().Add(duration)
@@ -76,10 +74,10 @@ func GenerateToken(user *model.User, expiryStr string) (string, time.Time, error
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	ss, err := token.SignedString([]byte(secret))
 	if err != nil {
-		return "", time.Time{}, err
+		return "", err
 	}
 
-	return ss, expireAt, nil
+	return ss, nil
 }
 
 func ParseAndValidateToken(tokenStr string) (*ClaimsModel, error) {
