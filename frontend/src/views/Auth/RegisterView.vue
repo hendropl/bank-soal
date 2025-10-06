@@ -1,7 +1,8 @@
 <template>
   <div class="auth-container">
     <div class="auth-card">
-      <div class="logo"></div>
+      <img :src="loginIllustration" alt="Latih.in Logo" class="logo" />
+
       <h2>Unlimited free access to our resources</h2>
       <p>Sign up to see more</p>
 
@@ -18,84 +19,92 @@
       </p>
 
       <p class="login">
-        Already a member? <a href="#">Log in</a>
+        Already a member?
+        <router-link to="/login">Log in</router-link>
       </p>
     </div>
   </div>
 </template>
 
+<script>
+import loginIllustration from '../../assets/login-illustration.png'
+
+export default {
+  name: 'CreateAccountView',
+  data() {
+    return {
+      loginIllustration,
+    }
+  },
+}
+</script>
+
 <style scoped>
-/* ✅ Pastikan tidak ada scroll dari body */
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden; /* tidak bisa digeser */
+  overflow: hidden; /* 🔒 Tidak bisa digeser */
 }
 
-/* ✅ Layar penuh, center, tidak bisa di-scroll */
 .auth-container {
-  position: fixed; /* tetap di layar */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(145deg, #E6EAFF, #FFFFFF); /* lembut */
+  background-color: #e8ecff;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* ✅ Kartu utama */
+/* ✅ Kartu utama (diperkecil agar tidak "zoom") */
 .auth-card {
   background: #ffffff;
-  width: 90vw;
-  max-width: 520px;
-  border-radius: 24px;
-  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
-  padding: 48px 40px;
+  width: 85vw;            /* dari 90vw jadi 85vw */
+  max-width: 420px;       /* dari 520px jadi 420px */
+  border-radius: 20px;
+  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 36px 28px;     /* dari 48px 40px jadi lebih kecil */
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 16px;              /* jarak antar elemen dikurangi */
 }
 
-/* ✅ Logo placeholder */
+/* ✅ Logo */
 .logo {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background-color: #ccc;
+  width: 80px;           /* dari 100px dikurangi biar lebih seimbang */
+  margin-bottom: 8px;
 }
 
-/* ✅ Teks utama */
 h2 {
-  font-size: 24px;
+  font-size: 22px;       /* sedikit lebih kecil */
   font-weight: 600;
-  color: #111; /* hitam */
-  margin-bottom: 8px;
+  color: #111;
+  margin-bottom: 6px;
 }
 
 p {
   color: #333;
-  font-size: 16px;
+  font-size: 15px;
 }
 
-/* ✅ Tombol */
 .button-group {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-top: 24px;
+  gap: 14px;
+  margin-top: 18px;
   width: 100%;
 }
 
 .btn {
   width: 100%;
-  height: 52px;
-  border-radius: 32px;
-  font-size: 16px;
+  height: 48px;         /* sedikit lebih pendek */
+  border-radius: 28px;
+  font-size: 15px;
   cursor: pointer;
   transition: 0.2s;
 }
@@ -122,9 +131,8 @@ p {
   transform: scale(1.02);
 }
 
-/* ✅ Teks bawah */
 .agreement {
-  font-size: 14px;
+  font-size: 13px;
   color: #666;
   width: 90%;
   line-height: 1.5;
@@ -136,7 +144,7 @@ p {
 }
 
 .login {
-  font-size: 15px;
+  font-size: 14px;
   color: #333;
 }
 

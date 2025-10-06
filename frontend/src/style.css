@@ -12,6 +12,16 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* ---- GLOBAL FIX UNTUK MENCEGAH SCROLL HORIZONTAL ---- */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden !important;  /* ⛔ Tidak bisa digeser ke kanan */
+  overflow-y: auto;               /* scroll hanya vertikal jika butuh */
+  background-color: #e8ecff;      /* biar warna latar tetap sama */
+}
 
 a {
   font-weight: 500;
