@@ -25,28 +25,35 @@
 </template>
 
 <style scoped>
-/* ✅ Layar penuh */
+/* ✅ Pastikan tidak ada scroll dari body */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden; /* tidak bisa digeser */
+}
+
+/* ✅ Layar penuh, center, tidak bisa di-scroll */
 .auth-container {
+  position: fixed; /* tetap di layar */
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #E6EAFF; /* Warna biru muda lembut */
+  background: linear-gradient(145deg, #E6EAFF, #FFFFFF); /* lembut */
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden; /* ❌ Supaya tidak bisa digeser */
-  margin: 0;
-  padding: 0;
 }
 
 /* ✅ Kartu utama */
 .auth-card {
-  background: #ffffff; /* Putih */
+  background: #ffffff;
   width: 90vw;
-  max-width: 544px;
-  height: auto;
+  max-width: 520px;
   border-radius: 24px;
   box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
-  padding: 48px;
+  padding: 48px 40px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -62,16 +69,16 @@
   background-color: #ccc;
 }
 
-/* ✅ Teks utama — dibuat gelap biar kelihatan */
+/* ✅ Teks utama */
 h2 {
   font-size: 24px;
   font-weight: 600;
-  color: #111111; /* warna hitam */
+  color: #111; /* hitam */
   margin-bottom: 8px;
 }
 
 p {
-  color: #333333;
+  color: #333;
   font-size: 16px;
 }
 
@@ -81,11 +88,12 @@ p {
   flex-direction: column;
   gap: 16px;
   margin-top: 24px;
+  width: 100%;
 }
 
 .btn {
   width: 100%;
-  height: 56px;
+  height: 52px;
   border-radius: 32px;
   font-size: 16px;
   cursor: pointer;
@@ -93,7 +101,7 @@ p {
 }
 
 .btn.email {
-  background: #111111;
+  background: #111;
   color: white;
   border: none;
 }
@@ -114,7 +122,7 @@ p {
   transform: scale(1.02);
 }
 
-/* ✅ Bagian bawah */
+/* ✅ Teks bawah */
 .agreement {
   font-size: 14px;
   color: #666;
