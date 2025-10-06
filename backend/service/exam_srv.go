@@ -9,7 +9,7 @@ import (
 )
 
 type ExamService interface {
-	Create(ctx context.Context, data model.Exam) (*model.Exam, error)
+	Create(ctx context.Context, data model.Exam) error
 	GetById(ctx context.Context, id int) (*model.Exam, error)
 	Update(ctx context.Context, data model.Exam) (*model.Exam, error)
 	Delete(ctx context.Context, id int) error
@@ -26,21 +26,21 @@ func NewExamService(repo repository.ExamRepository) ExamService {
 	}
 }
 
-func (s *examService) Create(ctx context.Context, data model.Exam) (*model.Exam, error) {
+func (s *examService) Create(ctx context.Context, data model.Exam) error {
 	if data.CreatorId == 0 {
-		return nil, fmt.Errorf("creatorId is required")
+		return fmt.Errorf("creatorId is required")
 	}
 
 	if data.EndedAt.Before(data.StartedAt) {
-		return nil, fmt.Errorf("ended_at must be after started_at")
+		return fmt.Errorf("ended_at must be after started_at")
 	}
 
-	createdData, err := s.repo.Create(ctx, data)
+	err := s.repo.Create(ctx, data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create exam: %w", err)
+		return fmt.Errorf("failed to create exam: %w", err)
 	}
 
-	return createdData, nil
+	return nil
 }
 
 func (s *examService) GetById(ctx context.Context, id int) (*model.Exam, error) {

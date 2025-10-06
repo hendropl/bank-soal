@@ -9,7 +9,7 @@ import (
 )
 
 type ScoreService interface {
-	Create(ctx context.Context, data model.Score) (*model.Score, error)
+	Create(ctx context.Context, data model.Score) error
 	GetById(ctx context.Context, id int) (*model.Score, error)
 	Update(ctx context.Context, data model.Score) (*model.Score, error)
 	Delete(ctx context.Context, id int) error
@@ -26,17 +26,17 @@ func NewScoreService(repo repository.ScoreRepository) ScoreService {
 	}
 }
 
-func (s *scoreService) Create(ctx context.Context, data model.Score) (*model.Score, error) {
+func (s *scoreService) Create(ctx context.Context, data model.Score) error {
 	if data.ExamId == 0 {
-		return nil, fmt.Errorf("examId is required")
+		return fmt.Errorf("examId is required")
 	}
 
-	createdData, err := s.repo.Create(ctx, data)
+	err := s.repo.Create(ctx, data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create score: %w", err)
+		return fmt.Errorf("failed to create score: %w", err)
 	}
 
-	return createdData, nil
+	return nil
 }
 
 func (s *scoreService) GetById(ctx context.Context, id int) (*model.Score, error) {

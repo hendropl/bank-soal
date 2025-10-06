@@ -9,7 +9,7 @@ import (
 )
 
 type QuestionService interface {
-	Create(ctx context.Context, data model.Question) (*model.Question, error)
+	Create(ctx context.Context, data model.Question) error
 	GetById(ctx context.Context, id int) (*model.Question, error)
 	Update(ctx context.Context, data model.Question) (*model.Question, error)
 	Delete(ctx context.Context, id int) error
@@ -26,17 +26,17 @@ func NewQuestionService(repo repository.QuestionRepository) QuestionService {
 	}
 }
 
-func (s *questionService) Create(ctx context.Context, data model.Question) (*model.Question, error) {
+func (s *questionService) Create(ctx context.Context, data model.Question) error {
 	if data.ExamId == 0 {
-		return nil, fmt.Errorf("examId is required")
+		return fmt.Errorf("examId is required")
 	}
 
-	createdData, err := s.repo.Create(ctx, data)
+	err := s.repo.Create(ctx, data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create question: %w", err)
+		return fmt.Errorf("failed to create question: %w", err)
 	}
 
-	return createdData, nil
+	return nil
 }
 
 func (s *questionService) GetById(ctx context.Context, id int) (*model.Question, error) {

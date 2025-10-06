@@ -9,7 +9,7 @@ import (
 )
 
 type ExamScoreService interface {
-	Create(ctx context.Context, data model.ExamScore) (*model.ExamScore, error)
+	Create(ctx context.Context, data model.ExamScore) error
 	GetById(ctx context.Context, id int) (*model.ExamScore, error)
 	Update(ctx context.Context, data model.ExamScore) (*model.ExamScore, error)
 	Delete(ctx context.Context, id int) error
@@ -26,17 +26,17 @@ func NewExamScoreService(repo repository.ExamScoreRepository) ExamScoreService {
 	}
 }
 
-func (s *examScoreService) Create(ctx context.Context, data model.ExamScore) (*model.ExamScore, error) {
+func (s *examScoreService) Create(ctx context.Context, data model.ExamScore) error {
 	if data.UserId == 0 {
-		return nil, fmt.Errorf("userId is required")
+		return fmt.Errorf("userId is required")
 	}
 
-	createdData, err := s.repo.Create(ctx, data)
+	err := s.repo.Create(ctx, data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create examScore: %w", err)
+		return fmt.Errorf("failed to create examScore: %w", err)
 	}
 
-	return createdData, nil
+	return nil
 }
 
 func (s *examScoreService) GetById(ctx context.Context, id int) (*model.ExamScore, error) {
