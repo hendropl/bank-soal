@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/Auth/LoginView.vue'
 import RegisterView from '../views/Auth/RegisterView.vue'
+// 1. Impor komponen ForgotPassword di sini
+import ForgotPassword from '../views/Auth/ForgotPassword.vue'
 
 const routes = [
   {
@@ -16,6 +18,12 @@ const routes = [
     path: '/register',
     name: 'register',
     component: RegisterView
+  },
+  // 2. Tambahkan rute baru untuk halaman forgot password
+  {
+    path: '/forgot-password',
+    name: 'ForgotPassword',
+    component: ForgotPassword
   }
 ]
 
