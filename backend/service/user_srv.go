@@ -6,22 +6,23 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
+	"latih.in-be/helper"
 	"latih.in-be/model"
 	"latih.in-be/repository"
 )
 
 type UserService interface {
-	Register(ctx context.Context, user model.RegisterCredential) error
-	Login(ctx context.Context, cred model.LoginCredential) (*model.User, error)
-	GetUserById(ctx context.Context, id int) (*model.User, error)
-	GetUserByEmail(ctx context.Context, email string) (*model.User, error)
-	Update(ctx context.Context, user *model.User) (*model.User, error)
-	DeleteUser(ctx context.Context, user model.User) error
-	GetUsers(ctx context.Context) ([]model.User, error)
-	GetUserByNim(ctx context.Context, nim string) (*model.User, error)
-	GetUsersByName(ctx context.Context, name string) ([]model.User, error)
-	GetUsersByRole(ctx context.Context, role string) ([]model.User, error)
-	ChangePassword(ctx context.Context, id int, password string) error
+	Register(ctx context.Context, data model.RegisterCredential) error
+	Login(ctx context.Context, cred model.LoginCredential) (*model.User, string, error)
+	GetById(ctx context.Context, id int) (*model.User, error)
+	GetByEmail(ctx context.Context, email string) (*model.User, error)
+	Update(ctx context.Context, data model.User) (*model.User, error)
+	Delete(ctx context.Context, id int) error
+	GetAll(ctx context.Context) ([]model.User, error)
+	GetByNim(ctx context.Context, nim string) (*model.User, error)
+	GetByName(ctx context.Context, name string) ([]model.User, error)
+	GetByRole(ctx context.Context, role string) ([]model.User, error)
+	ChangePassword(ctx context.Context, id int, oldPassword, newPassword string) error
 	ChangeRole(ctx context.Context, id int, role string) error
 }
 
@@ -35,138 +36,168 @@ func NewUserService(repo repository.UserRepository) UserService {
 	}
 }
 
-func (s *userService) Register(ctx context.Context, credential model.RegisterCredential) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(credential.Password), bcrypt.DefaultCost)
+func (s *userService) Register(ctx context.Context, data model.RegisterCredential) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	validate := validator.New()
-
-	if err := validate.Struct(credential); err != nil {
+	if err := validate.Struct(data); err != nil {
 		return fmt.Errorf("validation failed: %w", err)
 	}
 
-	existingUser, _ := s.repo.GetUserByEmail(ctx, credential.Email)
-	if existingUser != nil {
-		return fmt.Errorf("email %s already used", credential.Email)
+	existingData, _ := s.repo.GetByEmail(ctx, data.Email)
+	if existingData != nil {
+		return fmt.Errorf("email %s already used", data.Email)
 	}
 
-	// 	if year < 1000 || year > 9999 { //soon
-	//     return fmt.Errorf("Academic year must be a 4-digit number")
-	// }
-
-	user := model.User{
-		Name:     credential.Name,
-		Email:    credential.Email,
+	userData := model.User{
+		Name:     data.Name,
+		Email:    data.Email,
 		Password: string(hashedPassword),
-		Major:    credential.Major,
-		Nim:      credential.Nim,
-		Faculty:  credential.Faculty,
+		Major:    data.Major,
+		Nim:      data.Nim,
+		Faculty:  data.Faculty,
 	}
 
-	_, err = s.repo.Register(ctx, user)
+	_, err = s.repo.Register(ctx, userData)
 	if err != nil {
 		return fmt.Errorf("failed to register user: %w", err)
 	}
+
 	return nil
 }
 
-func (s *userService) Login(ctx context.Context, cred model.LoginCredential) (*model.User, error) {
-	user, err := s.repo.GetUserByEmail(ctx, cred.Email)
+func (s *userService) Login(ctx context.Context, cred model.LoginCredential) (*model.User, string, error) {
+	data, err := s.repo.GetByEmail(ctx, cred.Email)
 	if err != nil {
-		return nil, fmt.Errorf("user with email %s not found", cred.Email)
+		return nil, "", fmt.Errorf("user with email %s not found", cred.Email)
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(cred.Password))
-	if err != nil {
-		return nil, fmt.Errorf("wrong password")
+	if bcrypt.CompareHashAndPassword([]byte(data.Password), []byte(cred.Password)) != nil {
+		return nil, "", fmt.Errorf("wrong password")
 	}
 
-	return user, nil
+	token, err := helper.GenerateToken(data)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to generate token: %w", err)
+	}
+
+	return data, token, nil
 }
 
-func (s *userService) GetUserById(ctx context.Context, id int) (*model.User, error) {
-	user, err := s.repo.GetUserById(ctx, id)
+func (s *userService) GetById(ctx context.Context, id int) (*model.User, error) {
+	data, err := s.repo.GetById(ctx, id)
 	if err != nil {
 		return nil, fmt.Errorf("user not found: %w", err)
 	}
-	return user, nil
+	return data, nil
 }
 
-func (s *userService) GetUserByEmail(ctx context.Context, email string) (*model.User, error) {
-	user, err := s.repo.GetUserByEmail(ctx, email)
+func (s *userService) GetByEmail(ctx context.Context, email string) (*model.User, error) {
+	data, err := s.repo.GetByEmail(ctx, email)
 	if err != nil {
 		return nil, fmt.Errorf("user with email %s not found: %w", email, err)
 	}
-	return user, nil
+	return data, nil
 }
 
-func (s *userService) Update(ctx context.Context, user *model.User) (*model.User, error) {
-	updatedUser, err := s.repo.Update(ctx, *user)
+func (s *userService) Update(ctx context.Context, data model.User) (*model.User, error) {
+	updatedData, err := s.repo.Update(ctx, data)
 	if err != nil {
 		return nil, fmt.Errorf("update failed: %w", err)
 	}
-	return updatedUser, nil
+	return updatedData, nil
 }
 
-func (s *userService) DeleteUser(ctx context.Context, user model.User) error {
-	err := s.repo.DeleteUser(ctx, user)
-	if err != nil {
-		return fmt.Errorf("delete user failed: %w", err)
+func (s *userService) Delete(ctx context.Context, id int) error {
+	if err := s.repo.Delete(ctx, id); err != nil {
+		return fmt.Errorf("failed to delete data: %w", err)
 	}
 	return nil
 }
 
-func (s *userService) GetUsers(ctx context.Context) ([]model.User, error) {
-	users, err := s.repo.GetUsers(ctx)
+func (s *userService) GetAll(ctx context.Context) ([]model.User, error) {
+	dataList, err := s.repo.GetAll(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("users are not found: %w", err)
+		return nil, fmt.Errorf("failed to get all users: %w", err)
 	}
-	return users, nil
+	return dataList, nil
 }
 
-func (s *userService) GetUserByNim(ctx context.Context, nim string) (*model.User, error) {
-	user, err := s.repo.GetUserByNim(ctx, nim)
-	if err != nil {
-		return nil, fmt.Errorf("user with nim %q are not found: %w", nim, err)
+func (s *userService) GetByNim(ctx context.Context, nim string) (*model.User, error) {
+	if len(nim) > 9 {
+		return nil, fmt.Errorf("nim cannot be more than 9 characters: %s", nim)
 	}
-	return user, nil
+
+	data, err := s.repo.GetByNim(ctx, nim)
+	if err != nil {
+		return nil, fmt.Errorf("user with nim %q not found: %w", nim, err)
+	}
+
+	return data, nil
 }
 
-func (s *userService) GetUsersByName(ctx context.Context, name string) ([]model.User, error) {
-	users, err := s.repo.GetUsersByName(ctx, name)
-	if err != nil {
-		return nil, fmt.Errorf("user with name %q are not found: %w", name, err)
+func (s *userService) GetByName(ctx context.Context, name string) ([]model.User, error) {
+	if containsNumber(name) {
+		return nil, fmt.Errorf("name cannot contain numbers")
 	}
-	return users, nil
+
+	dataList, err := s.repo.GetByName(ctx, name)
+	if err != nil {
+		return nil, fmt.Errorf("user with name %q not found: %w", name, err)
+	}
+	return dataList, nil
 }
 
-func (s *userService) GetUsersByRole(ctx context.Context, role string) ([]model.User, error) {
-	users, err := s.repo.GetUsersByRole(ctx, role)
-	if err != nil {
-		return nil, fmt.Errorf("user with role %q are not found: %w", role, err)
+func (s *userService) GetByRole(ctx context.Context, role string) ([]model.User, error) {
+	if role != "admin" && role != "user" && role != "lecturer" {
+		return nil, fmt.Errorf("invalid role: %s", role)
 	}
-	return users, nil
+
+	dataList, err := s.repo.GetByRole(ctx, role)
+	if err != nil {
+		return nil, fmt.Errorf("user with role %q not found: %w", role, err)
+	}
+
+	return dataList, nil
 }
 
-func (s *userService) ChangePassword(ctx context.Context, id int, password string) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func (s *userService) ChangePassword(ctx context.Context, id int, oldPassword, newPassword string) error {
+	data, err := s.repo.GetById(ctx, id)
 	if err != nil {
-		return fmt.Errorf("failed to hash password: %w", err)
+		return fmt.Errorf("user not found: %w", err)
 	}
 
-	err = s.repo.ChangePassword(ctx, id, string(hashedPassword))
+	if bcrypt.CompareHashAndPassword([]byte(data.Password), []byte(oldPassword)) != nil {
+		return fmt.Errorf("old password is incorrect")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
 	if err != nil {
+		return fmt.Errorf("failed to hash new password: %w", err)
+	}
+
+	if err := s.repo.ChangePassword(ctx, id, string(hashedPassword)); err != nil {
 		return fmt.Errorf("cannot change password: %w", err)
 	}
+
 	return nil
 }
 
 func (s *userService) ChangeRole(ctx context.Context, id int, role string) error {
-	err := s.repo.ChangeRole(ctx, id, role)
-	if err != nil {
+	if err := s.repo.ChangeRole(ctx, id, role); err != nil {
 		return fmt.Errorf("cannot change role: %w", err)
 	}
 	return nil
+}
+
+func containsNumber(s string) bool {
+	for _, ch := range s {
+		if ch >= '0' && ch <= '9' {
+			return true
+		}
+	}
+	return false
 }
