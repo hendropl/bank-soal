@@ -1,225 +1,129 @@
 <template>
-  <div class="home-container">
-    <header class="navbar">
-      <div class="logo">Latih.in</div>
-      <nav class="nav-links">
-        
-        <nav class="nav-links">
-          <router-link to="/" class="active">Home</router-link>
-          <router-link to="/ujian">Ujian</router-link> </nav>
-      </nav>
+  <div class="font-sans bg-white text-dark-text">
+    
+    <div class="relative bg-background">
       
-      <div class="profile-container">
-        <div class="user-profile" @click="toggleProfileDropdown">
-          <img :src="userIcon" alt="User Profile" />
-        </div>
-
-        <div v-if="showProfileDropdown" class="profile-dropdown">
-          <template v-if="isLoggedIn">
-            <div class="dropdown-header">
-              <img :src="userIcon" alt="User Profile" class="dropdown-avatar" />
-              <div class="user-info">
-                <div class="user-name">{{ user.fullName }}</div>
-                <div class="user-id">{{ user.studentID }}</div>
+      <header class="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-[5%] py-6">
+        <router-link to="/" class="text-3xl font-bold no-underline text-primary">Latih.in</router-link>
+        <nav class="items-center hidden gap-10 md:flex">
+          <router-link to="/" class="font-semibold no-underline text-primary">Home</router-link>
+          <router-link to="/ujian" class="font-semibold no-underline text-medium-text hover:text-primary">Ujian</router-link>
+        </nav>
+        
+        <div class="relative">
+          <div @click="toggleProfileDropdown" class="cursor-pointer">
+            <img :src="userIcon" alt="User Profile" class="w-10 h-10 rounded-full" />
+          </div>
+          <div v-if="showProfileDropdown" class="absolute top-16 right-0 z-50 w-72 p-2 bg-white rounded-lg shadow-xl border border-gray-100">
+            <template v-if="isLoggedIn">
+              <div class="flex items-center p-2">
+                <img :src="userIcon" alt="User Profile" class="w-12 h-12 rounded-full mr-4" />
+                <div>
+                  <div class="font-semibold">{{ user.fullName }}</div>
+                  <div class="text-sm text-gray-500">{{ user.studentID }}</div>
+                </div>
               </div>
-            </div>
-            <hr class="dropdown-divider" />
-            <a href="#" class="dropdown-item">My Exam</a>
-            <a href="#" class="dropdown-item">Update Profile</a>
-            <a href="#" class="dropdown-item" @click="logout">Logout</a>
-          </template>
-          
-          <template v-else>
-            <router-link to="/login" class="dropdown-item login-link">Login</router-link>
-          </template>
+              <hr class="my-2 border-gray-200" />
+              <a href="#" class="block w-full px-4 py-2 text-left text-gray-700 rounded hover:bg-gray-100">My Exam</a>
+              <router-link to="/update-profile" class="block w-full px-4 py-2 text-left text-gray-700 rounded hover:bg-gray-100">Update Profile</router-link>
+              <a href="#" @click="logout" class="block w-full px-4 py-2 text-left text-gray-700 rounded hover:bg-gray-100">Logout</a>
+            </template>
+            <template v-else>
+              <router-link to="/login" class="block w-full px-4 py-2 font-semibold text-center text-gray-700 rounded hover:bg-gray-100">Login</router-link>
+            </template>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <section 
+          class="pt-32 pb-16 text-center" 
+          :style="{ backgroundImage: `url('${heroBgPattern}')` }"
+        >
+          <h1 class="text-6xl font-bold text-dark-text">
+            Test Seleksi Mahasiswa Pindahan  <br />
+            <span class="text-primary">Latih.in</span>
+          </h1>
+          <hr class="w-1/2 mx-auto my-8 border-gray-300" />
+        </section>
+      </main>
+    </div>
+
+    <section class="max-w-6xl px-4 py-16 mx-auto">
+      <h2 class="mb-12 text-4xl font-bold text-center">Apa itu Latih.in?</h2>
+      <div class="flex flex-col items-center gap-12 md:flex-row">
+        <div class="flex-1"><img :src="illustration1" alt="E-learning Illustration" class="w-full h-auto max-w-sm mx-auto" /></div>
+        <div class="flex-1">
+          <p class="text-lg leading-relaxed text-medium-text">Latih.in blablablablablablablablablabla</p>
         </div>
       </div>
-    </header>
+    </section>
 
-    <main>
-      <section class="hero-section">
-        <div class="hero-content">
-          <h1>
-            Ujian Mahasiswa Pindahan
-            <span class="logo-hero">Latih.in</span>
-          </h1>
-          <hr class="separator" />
+    <section class="max-w-6xl px-4 py-16 mx-auto">
+      <div class="flex flex-col items-center gap-12 md:flex-row-reverse">
+        <div class="flex-1"><img :src="illustration2" alt="Video Learning Illustration" class="w-full h-auto max-w-sm mx-auto" /></div>
+        <div class="flex-1">
+          <p class="text-lg leading-relaxed text-medium-text">
+            Latih.in dapat diakses kapan saja dan dimana saja melalui perangkat apapun. Kami memberikan video pembelajaran yang dikemas dengan animasi dan interaksi yang menarik untuk membuat belajar jadi lebih menyenangkan.
+          </p>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section class="info-section">
-        <h2 class="section-title">Apa itu Latih.in?</h2>
-        <div class="info-content">
-          <div class="info-image">
-            <img :src="illustration1" alt="E-learning Illustration" />
-          </div>
-          <div class="info-text">
-            <p>
-              Latih.in adalah platform belajar online yang menyediakan berbagai materi pelajaran dalam format yang menarik dan mudah dipahami. Kami percaya belajar bisa menjadi petualangan yang seru.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section class="info-section">
-        <div class="info-content reverse">
-          <div class="info-image">
-            <img :src="illustration2" alt="Video Learning Illustration" />
-          </div>
-          <div class="info-text">
-            <p>
-              Latih.in dapat diakses kapan saja dan dimana saja melalui perangkat apapun. Kami memberikan video pembelajaran yang dikemas dengan animasi dan interaksi yang menarik untuk membuat belajar jadi lebih menyenangkan.
-            </p>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-wave">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
-          <path fill="#e8ecff" fill-opacity="1" d="M0,192L80,176C160,160,320,128,480,138.7C640,149,800,203,960,208C1120,213,1280,171,1360,149.3L1440,128L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+    <div class="relative">
+      <div class="absolute top-0 w-full -mt-px">
+        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1440 29.6135V120H0V29.6135C240 5.86981 480 0 720 0C960 0 1200 5.86981 1440 29.6135Z" fill="#A7DDFF"/>
         </svg>
       </div>
-      <div class="footer-content">
-        <div class="logo-footer">Latih.in</div>
-        <p>Mari Belajar bersama Latih.in</p>
-        <small>&copy; 2024 - Latih.in - All Rights Reserved</small>
-      </div>
-    </footer>
+      <footer class="relative pt-32 pb-8 text-center bg-[#A7DDFF]">
+        <div class="text-4xl font-bold text-primary">Latih.in</div>
+        <p class="mt-4 text-lg text-dark-text">Mari Belajar bersama Latih.in</p>
+        <small class="block mt-8 text-sm opacity-75 text-medium-text">&copy; 2025 - Latih.in - All Rights Reserved</small>
+      </footer>
+    </div>
   </div>
 </template>
 
 <script>
+// Path gambar-gambar Anda yang sudah benar
 import userIcon from '../../assets/user-icon.png';
-import illustration1 from '../../assets/illustration-1.png';
-import illustration2 from '../../assets/illustration-2.png';
+import illustration1 from '../../assets/illustration-1.jpg';
+import illustration2 from '../../assets/illustration-2.jpg';
+
+// 1. Baris 'import heroBgPattern' yang bermasalah sudah DIHAPUS dari sini.
 
 export default {
   name: 'HomePage',
   data() {
     return {
-      isLoggedIn: false, 
+      isLoggedIn: false,
       showProfileDropdown: false,
-      user: null, 
+      user: null,
       userIcon,
       illustration1,
       illustration2,
+      // 2. Data SVG dipindahkan langsung ke sini sebagai string.
+      heroBgPattern: "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d3d8fc' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E",
     };
   },
   methods: {
-    toggleProfileDropdown() {
-      this.showProfileDropdown = !this.showProfileDropdown;
-    },
+    toggleProfileDropdown() { this.showProfileDropdown = !this.showProfileDropdown; },
     simulateLogin() {
       this.isLoggedIn = true;
-      this.user = {
-        fullName: 'nama',
-        
-      };
-      this.showProfileDropdown = false;
+      this.user = { fullName: 'Hendro Paulus', studentID: 'G1A023091' };
     },
     logout() {
-      localStorage.removeItem('isLoggedIn'); // Hapus status login
+      localStorage.removeItem('isLoggedIn');
       this.isLoggedIn = false;
       this.user = null;
       this.showProfileDropdown = false;
     },
   },
   mounted() {
-  if (localStorage.getItem('isLoggedIn') === 'true') {
-    this.simulateLogin();
-  }
-}
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+      this.simulateLogin();
+    }
+  },
 };
 </script>
-
-<style scoped>
-/* Semua style dari sebelumnya digabung di sini */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
-
-.home-container {
-  font-family: 'Poppins', sans-serif;
-  color: #333;
-  background-color: #fff;
-}
-
-/* NAVBAR */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 5%;
-  background-color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-.logo { font-size: 1.8rem; font-weight: 700; color: #6c63ff; }
-.nav-links { display: flex; gap: 2.5rem; }
-.nav-links a { text-decoration: none; color: #555; font-weight: 600; }
-.nav-links a.active { color: #6c63ff; }
-.user-profile img { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
-
-/* DROPDOWN */
-.profile-container { position: relative; }
-.profile-dropdown {
-  position: absolute; top: 60px; right: 0;
-  background-color: white; border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1); width: 280px;
-  z-index: 1001; border: 1px solid #f0f0f0;
-  overflow: hidden; padding: 10px 0;
-}
-.dropdown-header { display: flex; align-items: center; padding: 10px 20px; }
-.dropdown-avatar { width: 45px; height: 45px; border-radius: 50%; margin-right: 15px; }
-.user-info .user-name { font-weight: 600; font-size: 1rem; }
-.user-info .user-id { font-size: 0.85rem; color: #888; }
-.dropdown-divider { border: none; border-top: 1px solid #eee; margin: 10px 0; }
-.dropdown-item {
-  display: block; padding: 12px 20px; text-decoration: none;
-  color: #333; font-size: 0.95rem; transition: background-color 0.2s;
-  cursor: pointer;
-}
-.dropdown-item:hover { background-color: #f5f5f5; }
-.dropdown-item.login-link { text-align: center; font-weight: 600; }
-
-/* HERO SECTION */
-.hero-section {
-  text-align: center; padding: 4rem 2rem; background-color: #f0f2ff;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d3d8fc' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-}
-.hero-content h1 { font-size: 3.5rem; font-weight: 700; margin-bottom: 1rem; }
-.logo-hero { color: #6c63ff; }
-.separator { border: 1px solid #ddd; width: 50%; margin: auto; }
-
-/* INFO SECTION */
-.info-section { padding: 4rem 5%; max-width: 1100px; margin: auto; }
-.section-title { text-align: center; font-size: 2.5rem; font-weight: 700; margin-bottom: 3rem; }
-.info-content { display: flex; align-items: center; gap: 3rem; }
-.info-content.reverse { flex-direction: row-reverse; }
-.info-image { flex: 1; }
-.info-image img { max-width: 100%; height: auto; }
-.info-text { flex: 1; font-size: 1.1rem; line-height: 1.8; }
-
-/* FOOTER */
-.footer { position: relative; background-color: #e8ecff; color: #333; text-align: center; }
-.footer-wave {
-  position: absolute; top: 0; left: 0; width: 100%;
-  transform: translateY(-99%); pointer-events: none;
-}
-.footer-wave svg { display: block; }
-.footer-content { padding: 8rem 2rem 2rem; }
-.logo-footer { font-size: 2.5rem; font-weight: 700; color: #6c63ff; margin-bottom: 1rem; }
-.footer-content p { font-size: 1.2rem; margin-bottom: 2rem; }
-.footer-content small { font-size: 0.9rem; opacity: 0.8; }
-
-/* RESPONSIVE */
-@media (max-width: 768px) {
-  .nav-links { display: none; }
-  .hero-content h1 { font-size: 2.5rem; }
-  .info-content, .info-content.reverse {
-    flex-direction: column; text-align: center;
-  }
-}
-</style>

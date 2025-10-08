@@ -1,155 +1,48 @@
 <template>
-  <div class="auth-container">
-    <div class="auth-card">
-      <img :src="loginIllustration" alt="Latih.in Logo" class="logo" />
-
-      <h2>Unlimited free access to our resources</h2>
-      <p>Sign up to see more</p>
-
-      <div class="button-group">
-        <button class="btn email">Continue with Email</button>
-        <button class="btn facebook">Continue with Facebook</button>
-        <button class="btn google">Continue with Google</button>
+  <div class="flex items-center justify-center min-h-screen font-sans bg-background">
+    <div class="relative w-full max-w-sm p-8 space-y-4 text-center bg-white rounded-2xl shadow-xl">
+      
+      <div class="absolute text-2xl text-gray-400 cursor-pointer top-4 right-4 hover:text-gray-700">&times;</div>
+      
+      <img :src="loginIllustration" alt="Latih.in Logo" class="w-20 mx-auto mb-2" />
+      
+      <h2 class="text-3xl font-bold text-dark-text">Akses gratis tanpa batas ke sumber daya kami</h2>
+      <p class="text-medium-text">Daftar untuk melihat lebih banyak</p>
+      
+      <div class="flex flex-col w-full gap-3 pt-4">
+        <button class="w-full py-3 font-semibold text-white transition rounded-lg bg-dark-text hover:opacity-90">
+          Lanjutkan dengan email
+        </button>
+        <button class="flex items-center justify-center w-full gap-3 py-3 font-semibold transition bg-white border border-gray-300 rounded-lg text-medium-text hover:bg-gray-50">
+          <i class="fab fa-facebook-f text-blue-600"></i>
+          <span>Lanjutkan dengan Facebook</span>
+        </button>
+        <button class="flex items-center justify-center w-full gap-3 py-3 font-semibold transition bg-white border border-gray-300 rounded-lg text-medium-text hover:bg-gray-50">
+          <i class="fab fa-google"></i>
+          <span>Lanjutkan dengan Google</span>
+        </button>
       </div>
-
-      <p class="agreement">
-        By continuing, you agree to the
-        <a href="#">Terms of Service</a> and acknowledge our
-        <a href="#">Privacy Policy</a>.
-      </p>
-
-      <p class="login">
-        Already a member?
-        <router-link to="/login">Log in</router-link>
+      
+      
+      
+      <p class="pt-2 text-sm text-medium-text">
+        Sudah Punya Akun? 
+        <router-link to="/login" class="font-bold underline text-dark-text">Log in</router-link>
       </p>
     </div>
   </div>
 </template>
 
 <script>
-import loginIllustration from '../../assets/login-illustration.png'
+// Import ilustrasi ditambahkan kembali di sini
+import loginIllustration from '../../assets/login-illustration.png';
 
 export default {
-  name: 'CreateAccountView',
+  name: 'RegisterView',
   data() {
     return {
       loginIllustration,
-    }
+    };
   },
-}
+};
 </script>
-
-<style scoped>
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden; /* 🔒 Tidak bisa digeser */
-}
-
-.auth-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: #e8ecff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* ✅ Kartu utama (diperkecil agar tidak "zoom") */
-.auth-card {
-  background: #ffffff;
-  width: 85vw;            /* dari 90vw jadi 85vw */
-  max-width: 420px;       /* dari 520px jadi 420px */
-  border-radius: 20px;
-  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08);
-  padding: 36px 28px;     /* dari 48px 40px jadi lebih kecil */
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;              /* jarak antar elemen dikurangi */
-}
-
-/* ✅ Logo */
-.logo {
-  width: 80px;           /* dari 100px dikurangi biar lebih seimbang */
-  margin-bottom: 8px;
-}
-
-h2 {
-  font-size: 22px;       /* sedikit lebih kecil */
-  font-weight: 600;
-  color: #111;
-  margin-bottom: 6px;
-}
-
-p {
-  color: #333;
-  font-size: 15px;
-}
-
-.button-group {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 18px;
-  width: 100%;
-}
-
-.btn {
-  width: 100%;
-  height: 48px;         /* sedikit lebih pendek */
-  border-radius: 28px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.btn.email {
-  background: #111;
-  color: white;
-  border: none;
-}
-
-.btn.facebook {
-  background: #1877F2;
-  color: white;
-  border: none;
-}
-
-.btn.google {
-  background: white;
-  color: #444;
-  border: 1px solid #ddd;
-}
-
-.btn:hover {
-  transform: scale(1.02);
-}
-
-.agreement {
-  font-size: 13px;
-  color: #666;
-  width: 90%;
-  line-height: 1.5;
-}
-
-.agreement a {
-  color: #333;
-  font-weight: 500;
-}
-
-.login {
-  font-size: 14px;
-  color: #333;
-}
-
-.login a {
-  font-weight: 600;
-  color: #111;
-}
-</style>
