@@ -21,8 +21,8 @@ func UserRoutes(r *gin.Engine, user *controller.UserController) {
 			usersAuth.GET("/name/:name", user.GetByName)
 			usersAuth.GET("/role/:role", user.GetByRole)
 			usersAuth.GET("/", user.GetAll)
-			usersAuth.PUT("/", user.Update)
-			usersAuth.PUT("/password", user.ChangePassword)
+			usersAuth.PUT("/:id", user.Update)
+			usersAuth.PUT("/password/:id", user.ChangePassword)
 			usersAuth.DELETE("/id/:id", user.Delete)
 		}
 	}

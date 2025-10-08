@@ -88,14 +88,42 @@ func (h *UserController) GetByEmail(c *gin.Context) {
 }
 
 func (h *UserController) Update(c *gin.Context) {
-	var user model.User
-
-	if err := c.ShouldBindJSON(&user); err != nil {
-		helper.Error(c, http.StatusBadRequest, "invalid request body")
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		helper.Error(c, http.StatusBadRequest, "invalid user id")
 		return
 	}
 
-	updatedUser, err := h.service.Update(c.Request.Context(), user)
+	user := model.User{
+		Name:    c.PostForm("name"),
+		Nim:     c.PostForm("nim"),
+		Major:   c.PostForm("major"),
+		Faculty: c.PostForm("faculty"),
+		Status:  model.Status(c.PostForm("status")),
+	}
+
+	academicYearStr := c.PostForm("academic_year")
+	if academicYearStr != "" {
+		academicYear, err := strconv.Atoi(academicYearStr)
+		if err != nil {
+			helper.Error(c, http.StatusBadRequest, "invalid academic_year")
+			return
+		}
+		user.AcademicYear = academicYear
+	}
+
+	file, _ := c.FormFile("image")
+	if file != nil {
+		imageUrl, err := helper.UploadImage(c, id)
+		if err != nil {
+			helper.Error(c, http.StatusInternalServerError, "failed to upload image")
+			return
+		}
+		user.ImgUrl = imageUrl
+	}
+
+	updatedUser, err := h.service.Update(c.Request.Context(), user, id)
 	if err != nil {
 		helper.Error(c, http.StatusInternalServerError, err.Error())
 		return
@@ -142,7 +170,7 @@ func (h *UserController) GetByNim(c *gin.Context) {
 
 func (h *UserController) GetByName(c *gin.Context) {
 	name := c.Param("name")
-	users, err := h.service.GetByNim(c, name)
+	users, err := h.service.GetByName(c, name)
 	if err != nil {
 		helper.Error(c, http.StatusNotFound, err.Error())
 		return
@@ -153,7 +181,7 @@ func (h *UserController) GetByName(c *gin.Context) {
 
 func (h *UserController) GetByRole(c *gin.Context) {
 	role := c.Param("role")
-	users, err := h.service.GetByNim(c, role)
+	users, err := h.service.GetByRole(c, role)
 	if err != nil {
 		helper.Error(c, http.StatusNotFound, err.Error())
 		return

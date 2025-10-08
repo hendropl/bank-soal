@@ -16,7 +16,7 @@ type UserService interface {
 	Login(ctx context.Context, cred model.LoginCredential) (*model.User, string, error)
 	GetById(ctx context.Context, id int) (*model.User, error)
 	GetByEmail(ctx context.Context, email string) (*model.User, error)
-	Update(ctx context.Context, data model.User) (*model.User, error)
+	Update(ctx context.Context, data model.User, id int) (*model.User, error)
 	Delete(ctx context.Context, id int) error
 	GetAll(ctx context.Context) ([]model.User, error)
 	GetByNim(ctx context.Context, nim string) (*model.User, error)
@@ -59,6 +59,7 @@ func (s *userService) Register(ctx context.Context, data model.RegisterCredentia
 		Major:    data.Major,
 		Nim:      data.Nim,
 		Faculty:  data.Faculty,
+		Role:     model.RoleUser,
 	}
 
 	_, err = s.repo.Register(ctx, userData)
@@ -103,15 +104,36 @@ func (s *userService) GetByEmail(ctx context.Context, email string) (*model.User
 	return data, nil
 }
 
-func (s *userService) Update(ctx context.Context, data model.User) (*model.User, error) {
-	updatedData, err := s.repo.Update(ctx, data)
+func (s *userService) Update(ctx context.Context, data model.User, id int) (*model.User, error) {
+	oldUser, err := s.repo.GetById(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("update failed: %w", err)
+		return nil, fmt.Errorf("user not found: %w", err)
 	}
-	return updatedData, nil
+
+	if oldUser.ImgUrl != "" && oldUser.ImgUrl != data.ImgUrl {
+		if err := helper.DeleteImage(oldUser.ImgUrl); err != nil {
+			return nil, fmt.Errorf("failed to delete old image: %w", err)
+		}
+	}
+
+	updatedUser, err := s.repo.Update(ctx, data, id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update user: %w", err)
+	}
+
+	return updatedUser, nil
 }
 
 func (s *userService) Delete(ctx context.Context, id int) error {
+	user, err := s.repo.GetById(ctx, id)
+	if err != nil {
+		return fmt.Errorf("user not found: %w", err)
+	}
+
+	if err := helper.DeleteImage(user.ImgUrl); err != nil {
+		return fmt.Errorf("failed to delete image: %w", err)
+	}
+
 	if err := s.repo.Delete(ctx, id); err != nil {
 		return fmt.Errorf("failed to delete data: %w", err)
 	}
