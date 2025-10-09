@@ -25,6 +25,14 @@ func (h *ExamController) Create(c *gin.Context) {
 		return
 	}
 
+	if data.Difficulty != "" &&
+		data.Difficulty != "easy" &&
+		data.Difficulty != "medium" &&
+		data.Difficulty != "hard" {
+		helper.Error(c, http.StatusBadRequest, "invalid difficulty value (must be 'easy', 'medium', or 'hard')")
+		return
+	}
+
 	if err := h.service.Create(c.Request.Context(), data); err != nil {
 		helper.Error(c, http.StatusInternalServerError, err.Error())
 		return
@@ -60,18 +68,33 @@ func (h *ExamController) GetAll(c *gin.Context) {
 }
 
 func (h *ExamController) Update(c *gin.Context) {
-	var data model.Exam
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		helper.Error(c, http.StatusBadRequest, "invalid id")
+		return
+	}
 
+	var data model.Exam
 	if err := c.ShouldBindJSON(&data); err != nil {
 		helper.Error(c, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
-	updatedData, err := h.service.Update(c, data)
+	if data.Difficulty != "" &&
+		data.Difficulty != "easy" &&
+		data.Difficulty != "medium" &&
+		data.Difficulty != "hard" {
+		helper.Error(c, http.StatusBadRequest, "invalid difficulty value (must be 'easy', 'medium', or 'hard')")
+		return
+	}
+
+	updatedData, err := h.service.Update(c, data, id)
 	if err != nil {
 		helper.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
 	helper.Success(c, updatedData, "data updated")
 }
 

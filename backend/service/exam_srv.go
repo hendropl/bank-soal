@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"latih.in-be/helper"
 	"latih.in-be/model"
 	"latih.in-be/repository"
 )
@@ -11,7 +13,7 @@ import (
 type ExamService interface {
 	Create(ctx context.Context, data model.Exam) error
 	GetById(ctx context.Context, id int) (*model.Exam, error)
-	Update(ctx context.Context, data model.Exam) (*model.Exam, error)
+	Update(ctx context.Context, data model.Exam, id int) (*model.Exam, error)
 	Delete(ctx context.Context, id int) error
 	GetAll(ctx context.Context) ([]model.Exam, error)
 }
@@ -28,15 +30,22 @@ func NewExamService(repo repository.ExamRepository) ExamService {
 
 func (s *examService) Create(ctx context.Context, data model.Exam) error {
 	if data.CreatorId == 0 {
-		return fmt.Errorf("creatorId is required")
+		return fmt.Errorf("creator_id is required")
 	}
 
-	if data.EndedAt.Before(data.StartedAt) {
-		return fmt.Errorf("ended_at must be after started_at")
+	if data.StartedAt == nil {
+		return fmt.Errorf("started_at is required")
 	}
 
-	err := s.repo.Create(ctx, data)
-	if err != nil {
+	if data.FinishedAt == nil {
+		return fmt.Errorf("finished_at is required")
+	}
+
+	if data.FinishedAt.Before(*data.StartedAt) {
+		return fmt.Errorf("finished_at must be after started_at")
+	}
+
+	if err := s.repo.Create(ctx, data); err != nil {
 		return fmt.Errorf("failed to create exam: %w", err)
 	}
 
@@ -51,11 +60,24 @@ func (s *examService) GetById(ctx context.Context, id int) (*model.Exam, error) 
 	return data, nil
 }
 
-func (s *examService) Update(ctx context.Context, data model.Exam) (*model.Exam, error) {
-	updatedData, err := s.repo.Update(ctx, data)
+func (s *examService) Update(ctx context.Context, data model.Exam, id int) (*model.Exam, error) {
+	updatedData, err := s.repo.Update(ctx, data, id)
 	if err != nil {
-		return nil, fmt.Errorf("update failed: %w", err)
+		if strings.Contains(err.Error(), "Unknown column") {
+			var fieldName string
+			parts := strings.Split(err.Error(), "'")
+			if len(parts) >= 2 {
+				fieldName = parts[1]
+			}
+
+			val := helper.GetFieldValue(data, fieldName)
+
+			return nil, fmt.Errorf("field '%s' with value '%v' is undefined", fieldName, val)
+		}
+
+		return nil, fmt.Errorf("update gagal: %v", err)
 	}
+
 	return updatedData, nil
 }
 

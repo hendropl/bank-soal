@@ -11,7 +11,7 @@ func ExamRoutes(r *gin.Engine, exam *controller.ExamController) {
 		exams.POST("/", exam.Create)
 		exams.GET("/", exam.GetAll)
 		exams.GET("/id/:id", exam.GetById)
-		exams.PUT("/", exam.Update)
+		exams.PUT("/:id", exam.Update)
 		exams.DELETE("/:id", exam.Delete)
 	}
 }
