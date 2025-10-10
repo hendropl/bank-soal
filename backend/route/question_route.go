@@ -6,12 +6,14 @@ import (
 )
 
 func QuestionRoutes(r *gin.Engine, question *controller.QuestionController) {
-	questions := r.Group("/exam")
+	questions := r.Group("/question")
 	{
 		questions.POST("/", question.Create)
 		questions.GET("/", question.GetAll)
 		questions.GET("/id/:id", question.GetById)
-		questions.PUT("/", question.Update)
+		questions.PUT("/:id", question.Update)
 		questions.DELETE("/:id", question.Delete)
+		questions.POST("/options", question.CreateWithOptions)
+		questions.POST("/json", question.CreateFromJson)
 	}
 }

@@ -60,6 +60,12 @@ func (h *QuestionController) GetAll(c *gin.Context) {
 }
 
 func (h *QuestionController) Update(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		helper.Error(c, http.StatusBadRequest, "invalid id")
+		return
+	}
 	var data model.Question
 
 	if err := c.ShouldBindJSON(&data); err != nil {
@@ -67,7 +73,7 @@ func (h *QuestionController) Update(c *gin.Context) {
 		return
 	}
 
-	updatedData, err := h.service.Update(c, data)
+	updatedData, err := h.service.Update(c, data, id)
 	if err != nil {
 		helper.Error(c, http.StatusInternalServerError, err.Error())
 		return
@@ -88,4 +94,39 @@ func (h *QuestionController) Delete(c *gin.Context) {
 		return
 	}
 	helper.Success(c, nil, "data deleted")
+}
+
+func (h *QuestionController) CreateWithOptions(c *gin.Context) {
+	var data model.Question
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		helper.Error(c, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	if err := h.service.Create(c, data); err != nil {
+		helper.Error(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	helper.Success(c, nil, "question created successfully")
+}
+
+func (h *QuestionController) CreateFromJson(c *gin.Context) {
+	file, err := c.FormFile("file")
+	if err != nil {
+		helper.Error(c, http.StatusBadRequest, "File tidak ditemukan. Gunakan key 'file' untuk upload")
+		return
+	}
+
+	if file.Header.Get("Content-Type") != "application/json" {
+		helper.Error(c, http.StatusBadRequest, "file berformat json")
+		return
+	}
+
+	if err := h.service.CreateFromJson(c, file); err != nil {
+		helper.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	helper.Success(c, nil, "questions upload successfully")
 }
