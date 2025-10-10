@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
@@ -118,7 +119,19 @@ func (s *userService) Update(ctx context.Context, data model.User, id int) (*mod
 
 	updatedUser, err := s.repo.Update(ctx, data, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to update user: %w", err)
+		if strings.Contains(err.Error(), "Unknown column") {
+			var fieldName string
+			parts := strings.Split(err.Error(), "'")
+			if len(parts) >= 2 {
+				fieldName = parts[1]
+			}
+
+			val := helper.GetFieldValue(data, fieldName)
+
+			return nil, fmt.Errorf("field '%s' with value '%v' is undefined", fieldName, val)
+		}
+
+		return nil, fmt.Errorf("update gagal: %v", err)
 	}
 
 	return updatedUser, nil

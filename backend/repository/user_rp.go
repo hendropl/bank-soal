@@ -78,6 +78,9 @@ func (r *userRepository) Update(ctx context.Context, user model.User, id int) (*
 	if user.ImgUrl != "" {
 		updateData["img_url"] = user.ImgUrl
 	}
+	if user.Role != "" {
+		updateData["role"] = user.Role
+	}
 
 	if len(updateData) == 0 {
 		return nil, fmt.Errorf("no fields to update")
