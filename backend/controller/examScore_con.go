@@ -60,6 +60,12 @@ func (h *ExamScoreController) GetAll(c *gin.Context) {
 }
 
 func (h *ExamScoreController) Update(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		helper.Error(c, http.StatusBadRequest, "invalid user id")
+		return
+	}
 	var data model.ExamScore
 
 	if err := c.ShouldBindJSON(&data); err != nil {
@@ -67,7 +73,7 @@ func (h *ExamScoreController) Update(c *gin.Context) {
 		return
 	}
 
-	updatedData, err := h.service.Update(c, data)
+	updatedData, err := h.service.Update(c, data, id)
 	if err != nil {
 		helper.Error(c, http.StatusInternalServerError, err.Error())
 		return
