@@ -11,7 +11,7 @@ import (
 type OptionService interface {
 	Create(ctx context.Context, data model.Option) error
 	GetById(ctx context.Context, id int) (*model.Option, error)
-	Update(ctx context.Context, data model.Option) (*model.Option, error)
+	Update(ctx context.Context, data model.Option, id int) (*model.Option, error)
 	Delete(ctx context.Context, id int) error
 	GetAll(ctx context.Context, qId int) ([]model.Option, error)
 }
@@ -47,8 +47,8 @@ func (s *optionService) GetById(ctx context.Context, id int) (*model.Option, err
 	return data, nil
 }
 
-func (s *optionService) Update(ctx context.Context, data model.Option) (*model.Option, error) {
-	updatedData, err := s.repo.Update(ctx, data)
+func (s *optionService) Update(ctx context.Context, data model.Option, id int) (*model.Option, error) {
+	updatedData, err := s.repo.Update(ctx, data, id)
 	if err != nil {
 		return nil, fmt.Errorf("update failed: %w", err)
 	}

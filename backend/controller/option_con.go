@@ -66,6 +66,12 @@ func (h *OptionController) GetAll(c *gin.Context) {
 }
 
 func (h *OptionController) Update(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		helper.Error(c, http.StatusBadRequest, "invalid id")
+		return
+	}
 	var data model.Option
 
 	if err := c.ShouldBindJSON(&data); err != nil {
@@ -73,7 +79,7 @@ func (h *OptionController) Update(c *gin.Context) {
 		return
 	}
 
-	updatedData, err := h.service.Update(c, data)
+	updatedData, err := h.service.Update(c, data, id)
 	if err != nil {
 		helper.Error(c, http.StatusInternalServerError, err.Error())
 		return
