@@ -11,7 +11,7 @@ import (
 type ScoreService interface {
 	Create(ctx context.Context, data model.Score) error
 	GetById(ctx context.Context, id int) (*model.Score, error)
-	Update(ctx context.Context, data model.Score) (*model.Score, error)
+	Update(ctx context.Context, data model.Score, id int) (*model.Score, error)
 	Delete(ctx context.Context, id int) error
 	GetAll(ctx context.Context, qId int) ([]model.Score, error)
 }
@@ -30,6 +30,9 @@ func (s *scoreService) Create(ctx context.Context, data model.Score) error {
 	if data.ExamId == 0 {
 		return fmt.Errorf("examId is required")
 	}
+	if data.QuestionId == 0 {
+		return fmt.Errorf("questionId is required")
+	}
 
 	err := s.repo.Create(ctx, data)
 	if err != nil {
@@ -47,8 +50,8 @@ func (s *scoreService) GetById(ctx context.Context, id int) (*model.Score, error
 	return data, nil
 }
 
-func (s *scoreService) Update(ctx context.Context, data model.Score) (*model.Score, error) {
-	updatedData, err := s.repo.Update(ctx, data)
+func (s *scoreService) Update(ctx context.Context, data model.Score, id int) (*model.Score, error) {
+	updatedData, err := s.repo.Update(ctx, data, id)
 	if err != nil {
 		return nil, fmt.Errorf("update failed: %w", err)
 	}

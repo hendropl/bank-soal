@@ -53,7 +53,7 @@ func (h *ScoreController) GetAll(c *gin.Context) {
 	idStr := c.Param("qId")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		helper.Error(c, http.StatusBadRequest, "invalid user id")
+		helper.Error(c, http.StatusBadRequest, "invalid question id")
 		return
 	}
 	data, err := h.service.GetAll(c.Request.Context(), id)
@@ -66,6 +66,12 @@ func (h *ScoreController) GetAll(c *gin.Context) {
 }
 
 func (h *ScoreController) Update(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		helper.Error(c, http.StatusBadRequest, "invalid id")
+		return
+	}
 	var data model.Score
 
 	if err := c.ShouldBindJSON(&data); err != nil {
@@ -73,7 +79,7 @@ func (h *ScoreController) Update(c *gin.Context) {
 		return
 	}
 
-	updatedData, err := h.service.Update(c, data)
+	updatedData, err := h.service.Update(c, data, id)
 	if err != nil {
 		helper.Error(c, http.StatusInternalServerError, err.Error())
 		return
