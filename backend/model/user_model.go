@@ -37,3 +37,8 @@ type ChangePasswordCredential struct {
 	OldPassword string `json:"old_password" binding:"required"`
 	NewPassword string `json:"new_password" binding:"required"`
 }
+
+type ChangeRoleCredential struct {
+	AdminId int  `json:"admin_id" binding:"required"`
+	Role    Role `json:"role" binding:"required"`
+}

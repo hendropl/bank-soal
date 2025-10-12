@@ -1,8 +1,7 @@
 package helper
 
-// buat handle error update field
-
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -15,6 +14,16 @@ func GetFieldValue(data interface{}, jsonTag string) interface{} {
 		tag := field.Tag.Get("json")
 		if tag == jsonTag {
 			return val.Field(i).Interface()
+		}
+	}
+	return nil
+}
+
+func ValidateFieldLengths(data interface{}, rules map[string]int) error {
+	for field, max := range rules {
+		val := GetFieldValue(data, field)
+		if str, ok := val.(string); ok && len(str) > max {
+			return fmt.Errorf("%s too long (max %d)", field, max)
 		}
 	}
 	return nil

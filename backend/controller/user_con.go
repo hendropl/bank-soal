@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -24,6 +25,22 @@ func (h *UserController) Register(c *gin.Context) {
 		helper.Error(c, http.StatusBadRequest, err.Error())
 		return
 	}
+	rules := map[string]int{
+		"name":    256,
+		"email":   512,
+		"faculty": 128,
+		"major":   256,
+	}
+
+	if err := helper.ValidateFieldLengths(user, rules); err != nil {
+		helper.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if !isValidEmail(user.Email) {
+		helper.Error(c, http.StatusBadRequest, "wrong email format")
+		return
+	}
 
 	if err := h.service.Register(c.Request.Context(), user); err != nil {
 		helper.Error(c, http.StatusInternalServerError, err.Error())
@@ -37,6 +54,11 @@ func (h *UserController) Login(c *gin.Context) {
 	var cred model.LoginCredential
 	if err := c.ShouldBindJSON(&cred); err != nil {
 		helper.Error(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if !isValidEmail(cred.Email) {
+		helper.Error(c, http.StatusBadRequest, "wrong email format")
 		return
 	}
 
@@ -73,10 +95,19 @@ func (h *UserController) GetById(c *gin.Context) {
 
 func (h *UserController) GetByEmail(c *gin.Context) {
 	email := c.Param("email")
-	// if err != nil {
-	// 	helper.Error(c, http.StatusBadRequest, "invalid user email")
-	// 	return
-	// }
+	if email == "" {
+		helper.Error(c, http.StatusBadRequest, "invalid user email")
+		return
+	}
+	if len(email) > 512 {
+		helper.Error(c, http.StatusBadRequest, "invalid email")
+		return
+	}
+
+	if !isValidEmail(email) {
+		helper.Error(c, http.StatusBadRequest, "wrong email format")
+		return
+	}
 
 	user, err := h.service.GetByEmail(c.Request.Context(), email)
 	if err != nil {
@@ -101,6 +132,11 @@ func (h *UserController) Update(c *gin.Context) {
 		Major:   c.PostForm("major"),
 		Faculty: c.PostForm("faculty"),
 		Status:  model.Status(c.PostForm("status")),
+	}
+
+	if !isValidEmail(user.Email) {
+		helper.Error(c, http.StatusBadRequest, "wrong email format")
+		return
 	}
 
 	academicYearStr := c.PostForm("academic_year")
@@ -160,6 +196,10 @@ func (h *UserController) GetAll(c *gin.Context) {
 func (h *UserController) GetByNim(c *gin.Context) {
 	nim := c.Param("nim")
 	user, err := h.service.GetByNim(c, nim)
+	if len(nim) >= 10 {
+		helper.Error(c, http.StatusBadRequest, "invalid nim")
+		return
+	}
 	if err != nil {
 		helper.Error(c, http.StatusNotFound, err.Error())
 		return
@@ -171,6 +211,10 @@ func (h *UserController) GetByNim(c *gin.Context) {
 func (h *UserController) GetByName(c *gin.Context) {
 	name := c.Param("name")
 	users, err := h.service.GetByName(c, name)
+	if len(name) > 256 {
+		helper.Error(c, http.StatusBadRequest, "invalid name")
+		return
+	}
 	if err != nil {
 		helper.Error(c, http.StatusNotFound, err.Error())
 		return
@@ -210,4 +254,63 @@ func (h *UserController) ChangePassword(c *gin.Context) {
 	}
 
 	helper.Success(c, nil, "password changed successfully")
+}
+
+func (h *UserController) ChangeRole(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		helper.Error(c, http.StatusBadRequest, "invalid user id")
+		return
+	}
+
+	var input model.ChangeRoleCredential
+	if err := c.ShouldBindJSON(&input); err != nil {
+		helper.Error(c, http.StatusBadRequest, "invalid input format")
+		return
+	}
+
+	if input.AdminId == 0 || input.Role == "" {
+		helper.Error(c, http.StatusBadRequest, "adminId and role are required")
+		return
+	}
+
+	admin, err := h.service.GetById(c, input.AdminId)
+	if err != nil {
+		helper.Error(c, http.StatusUnauthorized, "admin not found")
+		return
+	}
+	if admin.Role != "admin" {
+		helper.Error(c, http.StatusForbidden, "you are not authorized to change roles")
+		return
+	}
+
+	user, err := h.service.GetById(c, id)
+	if err != nil {
+		helper.Error(c, http.StatusNotFound, "user not found")
+		return
+	}
+
+	user.Role = input.Role
+	allowedRoles := map[string]bool{
+		"admin":    true,
+		"user":     true,
+		"lecturer": true,
+	}
+	if !allowedRoles[string(user.Role)] {
+		helper.Error(c, http.StatusBadRequest, "invalid role")
+		return
+	}
+
+	if err := h.service.ChangeRole(c, id, user.Role); err != nil {
+		helper.Error(c, http.StatusInternalServerError, "failed to update user role")
+		return
+	}
+
+	helper.Success(c, user, "user role updated successfully")
+}
+
+func isValidEmail(e string) bool {
+	re := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+	return re.MatchString(e)
 }

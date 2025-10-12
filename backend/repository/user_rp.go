@@ -19,7 +19,7 @@ type UserRepository interface {
 	GetByName(ctx context.Context, name string) ([]model.User, error)
 	GetByRole(ctx context.Context, role string) ([]model.User, error)
 	ChangePassword(ctx context.Context, id int, password string) error
-	ChangeRole(ctx context.Context, id int, role string) error
+	ChangeRole(ctx context.Context, id int, role model.Role) error
 }
 
 type userRepository struct {
@@ -40,7 +40,7 @@ func (r *userRepository) Register(ctx context.Context, user model.User) (*model.
 func (r *userRepository) GetById(ctx context.Context, id int) (*model.User, error) {
 	user := model.User{}
 
-	if err := r.db.WithContext(ctx).First(&user, id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(model.User{}).First(&user, id).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -94,7 +94,7 @@ func (r *userRepository) Update(ctx context.Context, user model.User, id int) (*
 	}
 
 	var updated model.User
-	if err := r.db.WithContext(ctx).First(&updated, id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(model.User{}).First(&updated, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -110,7 +110,7 @@ func (r *userRepository) Delete(ctx context.Context, id int) error {
 
 func (r *userRepository) GetAll(ctx context.Context) ([]model.User, error) {
 	var users []model.User
-	if err := r.db.WithContext(ctx).Find(&users).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(model.User{}).Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
@@ -118,7 +118,7 @@ func (r *userRepository) GetAll(ctx context.Context) ([]model.User, error) {
 
 func (r *userRepository) GetByNim(ctx context.Context, nim string) (*model.User, error) {
 	user := model.User{}
-	if err := r.db.WithContext(ctx).Where("nim = ?", nim).First(&user).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(model.User{}).Where("nim = ?", nim).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -126,7 +126,7 @@ func (r *userRepository) GetByNim(ctx context.Context, nim string) (*model.User,
 
 func (r *userRepository) GetByName(ctx context.Context, name string) ([]model.User, error) {
 	var users []model.User
-	if err := r.db.WithContext(ctx).Where("name = ?", name).Find(&users).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(model.User{}).Where("name = ?", name).Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
@@ -134,7 +134,7 @@ func (r *userRepository) GetByName(ctx context.Context, name string) ([]model.Us
 
 func (r *userRepository) GetByRole(ctx context.Context, role string) ([]model.User, error) {
 	var users []model.User
-	if err := r.db.WithContext(ctx).Where("role = ?", role).Find(&users).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(model.User{}).Where("role = ?", role).Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil
@@ -147,7 +147,7 @@ func (r *userRepository) ChangePassword(ctx context.Context, id int, password st
 	return nil
 }
 
-func (r *userRepository) ChangeRole(ctx context.Context, id int, role string) error {
+func (r *userRepository) ChangeRole(ctx context.Context, id int, role model.Role) error {
 	if err := r.db.WithContext(ctx).Model(&model.User{}).Where("id = ?", id).Update("role", role).Error; err != nil {
 		return err
 	}

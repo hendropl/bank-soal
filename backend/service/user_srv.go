@@ -24,7 +24,7 @@ type UserService interface {
 	GetByName(ctx context.Context, name string) ([]model.User, error)
 	GetByRole(ctx context.Context, role string) ([]model.User, error)
 	ChangePassword(ctx context.Context, id int, oldPassword, newPassword string) error
-	ChangeRole(ctx context.Context, id int, role string) error
+	ChangeRole(ctx context.Context, id int, role model.Role) error
 }
 
 type userService struct {
@@ -221,7 +221,7 @@ func (s *userService) ChangePassword(ctx context.Context, id int, oldPassword, n
 	return nil
 }
 
-func (s *userService) ChangeRole(ctx context.Context, id int, role string) error {
+func (s *userService) ChangeRole(ctx context.Context, id int, role model.Role) error {
 	if err := s.repo.ChangeRole(ctx, id, role); err != nil {
 		return fmt.Errorf("cannot change role: %w", err)
 	}
