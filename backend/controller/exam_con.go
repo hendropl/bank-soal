@@ -99,13 +99,19 @@ func (h *ExamController) Update(c *gin.Context) {
 }
 
 func (h *ExamController) Delete(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
+	idStr1 := c.Param("id")
+	id, err := strconv.Atoi(idStr1)
 	if err != nil {
 		helper.Error(c, http.StatusBadRequest, "invalid id")
 		return
 	}
-	err = h.service.Delete(c, id)
+	idStr2 := c.Param("userId")
+	idUser, err := strconv.Atoi(idStr2)
+	if err != nil {
+		helper.Error(c, http.StatusBadRequest, "invalid id")
+		return
+	}
+	err = h.service.Delete(c, id, idUser)
 	if err != nil {
 		helper.Error(c, http.StatusInternalServerError, err.Error())
 		return

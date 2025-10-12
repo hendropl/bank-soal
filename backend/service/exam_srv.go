@@ -14,12 +14,13 @@ type ExamService interface {
 	Create(ctx context.Context, data model.Exam) error
 	GetById(ctx context.Context, id int) (*model.Exam, error)
 	Update(ctx context.Context, data model.Exam, id int) (*model.Exam, error)
-	Delete(ctx context.Context, id int) error
+	Delete(ctx context.Context, id int, userId int) error
 	GetAll(ctx context.Context) ([]model.Exam, error)
 }
 
 type examService struct {
-	repo repository.ExamRepository
+	repo     repository.ExamRepository
+	userRepo repository.UserRepository
 }
 
 func NewExamService(repo repository.ExamRepository) ExamService {
@@ -89,7 +90,21 @@ func (s *examService) GetAll(ctx context.Context) ([]model.Exam, error) {
 	return data, nil
 }
 
-func (s *examService) Delete(ctx context.Context, id int) error {
+func (s *examService) Delete(ctx context.Context, id int, userId int) error {
+	data, err := s.repo.GetById(ctx, id)
+	if err != nil {
+		return fmt.Errorf("data is unavaible %w", err)
+	}
+
+	user, err := s.userRepo.GetById(ctx, userId)
+	if err != nil {
+		return fmt.Errorf("user is unavaible %w", err)
+	}
+
+	if user.Id != data.CreatorId && user.Role != model.RoleAdmin {
+		return fmt.Errorf("you are not the creator or admin")
+	}
+
 	if err := s.repo.Delete(ctx, id); err != nil {
 		return fmt.Errorf("failed to delete data: %w", err)
 	}
