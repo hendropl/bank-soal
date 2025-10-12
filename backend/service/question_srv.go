@@ -14,14 +14,15 @@ type QuestionService interface {
 	Create(ctx context.Context, data model.Question) error
 	GetById(ctx context.Context, id int) (*model.Question, error)
 	Update(ctx context.Context, data model.Question, id int) (*model.Question, error)
-	Delete(ctx context.Context, id int) error
+	Delete(ctx context.Context, id int, userId int) error
 	GetAll(ctx context.Context) ([]model.Question, error)
 	CreateWithOptions(ctx context.Context, data model.Question) error
 	CreateFromJson(ctx context.Context, file *multipart.FileHeader) error
 }
 
 type questionService struct {
-	repo repository.QuestionRepository
+	repo     repository.QuestionRepository
+	userRepo repository.UserRepository
 }
 
 func NewQuestionService(repo repository.QuestionRepository) QuestionService {
@@ -67,7 +68,21 @@ func (s *questionService) GetAll(ctx context.Context) ([]model.Question, error) 
 	return data, nil
 }
 
-func (s *questionService) Delete(ctx context.Context, id int) error {
+func (s *questionService) Delete(ctx context.Context, id int, userId int) error {
+	data, err := s.repo.GetById(ctx, id)
+	if err != nil {
+		return fmt.Errorf("data is unavaible %w", err)
+	}
+
+	user, err := s.userRepo.GetById(ctx, userId)
+	if err != nil {
+		return fmt.Errorf("user is unavaible %w", err)
+	}
+
+	if user.Id != data.CreatorId && user.Role != model.RoleAdmin {
+		return fmt.Errorf("you are not the creator or admin")
+	}
+
 	if err := s.repo.Delete(ctx, id); err != nil {
 		return fmt.Errorf("failed to delete data: %w", err)
 	}

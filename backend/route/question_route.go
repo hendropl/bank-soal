@@ -12,7 +12,7 @@ func QuestionRoutes(r *gin.Engine, question *controller.QuestionController) {
 		questions.GET("/", question.GetAll)
 		questions.GET("/id/:id", question.GetById)
 		questions.PUT("/:id", question.Update)
-		questions.DELETE("/:id", question.Delete)
+		questions.DELETE("/:id/:userId", question.Delete)
 		questions.POST("/options", question.CreateWithOptions)
 		questions.POST("/json", question.CreateFromJson)
 	}
