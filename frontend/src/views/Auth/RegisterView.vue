@@ -1,155 +1,77 @@
 <template>
-  <div class="auth-container">
-    <div class="auth-card">
-      <img :src="loginIllustration" alt="Latih.in Logo" class="logo" />
-
-      <h2>Unlimited free access to our resources</h2>
-      <p>Sign up to see more</p>
-
-      <div class="button-group">
-        <button class="btn email">Continue with Email</button>
-        <button class="btn facebook">Continue with Facebook</button>
-        <button class="btn google">Continue with Google</button>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4">
+          <GraduationCap class="w-8 h-8 text-white" />
+        </div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Daftar Akun</h1>
+        <p class="text-gray-600">Lengkapi data diri Anda untuk mendaftar</p>
       </div>
 
-      <p class="agreement">
-        By continuing, you agree to the
-        <a href="#">Terms of Service</a> and acknowledge our
-        <a href="#">Privacy Policy</a>.
-      </p>
+      <form @submit.prevent="handleSubmit" class="space-y-5">
+        <div v-for="field in fields" :key="field.name">
+          <label class="block text-sm font-medium text-gray-700 mb-2">{{ field.label }}</label>
+          <div class="relative">
 
-      <p class="login">
-        Already a member?
-        <router-link to="/login">Log in</router-link>
+            <Input 
+              :v-model="formData[field.name]"
+              :title="field.title"
+              :place-holder="field.placeholder"
+              :required="true"
+              id=""
+              :icon="field.icon"
+            />
+          </div>
+          <p v-if="errors[field.name]" class="text-red-500 text-sm mt-1">{{ errors[field.name] }}</p>
+        </div>
+        
+        <Button 
+          :text="isSubmitting ? 'Mendaftar...' : 'Daftar'"
+          :disabled="isSubmitting"
+          variant="modern"
+          size="medium"
+          class="w-full"
+          
+        />
+      </form>
+
+      <p class="text-center text-gray-600 mt-6">
+        Sudah punya akun?
+        <router-link to="/login" class="text-indigo-600 font-semibold hover:underline cursor-pointer">
+          Login di sini
+        </router-link>
       </p>
     </div>
   </div>
 </template>
 
-<script>
-import loginIllustration from '../../assets/login-illustration.png'
+<script setup>
+import { ref } from 'vue'
+import { Mail, Lock, User, BookOpen, Building2, GraduationCap } from 'lucide-vue-next'
+import Input from '../../components/ui/Input.vue'
+import Button from '../../components/ui/Button.vue'
 
-export default {
-  name: 'CreateAccountView',
-  data() {
-    return {
-      loginIllustration,
-    }
-  },
-}
+const formData = ref({
+  email: '',
+  password: '',
+  name: '',
+  nim: '',
+  major: '',
+  faculty: ''
+})
+1
+const errors = ref({})
+const isSubmitting = ref(false)
+
+const fields = [
+  { name: 'email', title: 'Email', type: 'email', placeholder: 'email@example.com', icon: Mail },
+  { name: 'password', title: 'Password', type: 'password', placeholder: 'Minimal 6 karakter', icon: Lock },
+  { name: 'name', title: 'Nama Lengkap', type: 'text', placeholder: 'Nama lengkap Anda', icon: User },
+  { name: 'nim', title: 'NIM', type: 'text', placeholder: 'Nomor Induk Mahasiswa', icon: BookOpen },
+  { name: 'major', title: 'Jurusan', type: 'text', placeholder: 'Contoh: Teknik Informatika', icon: GraduationCap },
+  { name: 'faculty', title: 'Fakultas', type: 'text', placeholder: 'Contoh: Fakultas Teknik', icon: Building2 }
+]
+
+const handleSubmit = () => {}
 </script>
-
-<style scoped>
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden; /* 🔒 Tidak bisa digeser */
-}
-
-.auth-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: #e8ecff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* ✅ Kartu utama (diperkecil agar tidak "zoom") */
-.auth-card {
-  background: #ffffff;
-  width: 85vw;            /* dari 90vw jadi 85vw */
-  max-width: 420px;       /* dari 520px jadi 420px */
-  border-radius: 20px;
-  box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08);
-  padding: 36px 28px;     /* dari 48px 40px jadi lebih kecil */
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;              /* jarak antar elemen dikurangi */
-}
-
-/* ✅ Logo */
-.logo {
-  width: 80px;           /* dari 100px dikurangi biar lebih seimbang */
-  margin-bottom: 8px;
-}
-
-h2 {
-  font-size: 22px;       /* sedikit lebih kecil */
-  font-weight: 600;
-  color: #111;
-  margin-bottom: 6px;
-}
-
-p {
-  color: #333;
-  font-size: 15px;
-}
-
-.button-group {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 18px;
-  width: 100%;
-}
-
-.btn {
-  width: 100%;
-  height: 48px;         /* sedikit lebih pendek */
-  border-radius: 28px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.btn.email {
-  background: #111;
-  color: white;
-  border: none;
-}
-
-.btn.facebook {
-  background: #1877F2;
-  color: white;
-  border: none;
-}
-
-.btn.google {
-  background: white;
-  color: #444;
-  border: 1px solid #ddd;
-}
-
-.btn:hover {
-  transform: scale(1.02);
-}
-
-.agreement {
-  font-size: 13px;
-  color: #666;
-  width: 90%;
-  line-height: 1.5;
-}
-
-.agreement a {
-  color: #333;
-  font-weight: 500;
-}
-
-.login {
-  font-size: 14px;
-  color: #333;
-}
-
-.login a {
-  font-weight: 600;
-  color: #111;
-}
-</style>
