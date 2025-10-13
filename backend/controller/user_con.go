@@ -73,7 +73,7 @@ func (h *UserController) Login(c *gin.Context) {
 		return
 	}
 
-	helper.Success(c, user, "login successful", accessToken, refreshToken)
+	helper.Success(c, user, "login successful", accessToken)
 }
 
 func (h *UserController) GetById(c *gin.Context) {
