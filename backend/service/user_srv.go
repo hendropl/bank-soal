@@ -14,7 +14,7 @@ import (
 
 type UserService interface {
 	Register(ctx context.Context, data model.RegisterCredential) error
-	Login(ctx context.Context, cred model.LoginCredential) (*model.User, string, error)
+	Login(ctx context.Context, cred model.LoginCredential) (*model.User, string, string, error)
 	GetById(ctx context.Context, id int) (*model.User, error)
 	GetByEmail(ctx context.Context, email string) (*model.User, error)
 	Update(ctx context.Context, data model.User, id int) (*model.User, error)
@@ -25,6 +25,7 @@ type UserService interface {
 	GetByRole(ctx context.Context, role string) ([]model.User, error)
 	ChangePassword(ctx context.Context, id int, oldPassword, newPassword string) error
 	ChangeRole(ctx context.Context, id int, role model.Role) error
+	RefreshToken(ctx context.Context, refreshToken string) (string, error)
 }
 
 type userService struct {
@@ -71,22 +72,27 @@ func (s *userService) Register(ctx context.Context, data model.RegisterCredentia
 	return nil
 }
 
-func (s *userService) Login(ctx context.Context, cred model.LoginCredential) (*model.User, string, error) {
+func (s *userService) Login(ctx context.Context, cred model.LoginCredential) (*model.User, string, string, error) {
 	data, err := s.repo.GetByEmail(ctx, cred.Email)
 	if err != nil {
-		return nil, "", fmt.Errorf("user with email %s not found", cred.Email)
+		return nil, "", "", fmt.Errorf("user with email %s not found", cred.Email)
 	}
 
 	if bcrypt.CompareHashAndPassword([]byte(data.Password), []byte(cred.Password)) != nil {
-		return nil, "", fmt.Errorf("wrong password")
+		return nil, "", "", fmt.Errorf("wrong password")
 	}
 
-	token, err := helper.GenerateToken(data)
+	accessToken, err := helper.GenerateAccessToken(data)
 	if err != nil {
-		return nil, "", fmt.Errorf("failed to generate token: %w", err)
+		return nil, "", "", fmt.Errorf("failed to generate access token: %w", err)
 	}
 
-	return data, token, nil
+	refreshToken, err := helper.GenerateRefreshToken(data)
+	if err != nil {
+		return nil, "", "", fmt.Errorf("failed to generate refresh token: %w", err)
+	}
+
+	return data, accessToken, refreshToken, nil
 }
 
 func (s *userService) GetById(ctx context.Context, id int) (*model.User, error) {
@@ -235,4 +241,23 @@ func containsNumber(s string) bool {
 		}
 	}
 	return false
+}
+
+func (s *userService) RefreshToken(ctx context.Context, refreshToken string) (string, error) {
+	userId, err := helper.ValidateRefreshToken(refreshToken)
+	if err != nil {
+		return "", fmt.Errorf("invalid or expired refresh token: %w", err)
+	}
+
+	user, err := s.repo.GetById(ctx, userId)
+	if err != nil {
+		return "", fmt.Errorf("user not found: %w", err)
+	}
+
+	newAccessToken, err := helper.GenerateAccessToken(user)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate new access token: %w", err)
+	}
+
+	return newAccessToken, nil
 }

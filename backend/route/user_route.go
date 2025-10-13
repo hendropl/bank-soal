@@ -12,6 +12,8 @@ func UserRoutes(r *gin.Engine, user *controller.UserController) {
 		users.POST("/register", user.Register)
 		users.POST("/login", user.Login)
 
+		users.POST("/refresh", user.RefreshToken)
+
 		usersAuth := users.Group("")
 		usersAuth.Use(middleware.AuthMiddleware())
 		{

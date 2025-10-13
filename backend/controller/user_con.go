@@ -62,18 +62,18 @@ func (h *UserController) Login(c *gin.Context) {
 		return
 	}
 
-	user, token, err := h.service.Login(c.Request.Context(), cred)
+	user, accessToken, refreshToken, err := h.service.Login(c.Request.Context(), cred)
 	if err != nil {
 		helper.Error(c, http.StatusUnauthorized, err.Error())
 		return
 	}
 
-	if err := helper.Write(c, token); err != nil {
+	if err := helper.Write(c, refreshToken); err != nil {
 		helper.Error(c, http.StatusInternalServerError, "failed to set cookie")
 		return
 	}
 
-	helper.Success(c, user, "login successful", token)
+	helper.Success(c, user, "login successful", accessToken, refreshToken)
 }
 
 func (h *UserController) GetById(c *gin.Context) {
@@ -308,6 +308,22 @@ func (h *UserController) ChangeRole(c *gin.Context) {
 	}
 
 	helper.Success(c, user, "user role updated successfully")
+}
+
+func (h *UserController) RefreshToken(c *gin.Context) {
+	refreshToken, err := c.Cookie("refresh_token")
+	if err != nil || refreshToken == "" {
+		helper.Error(c, http.StatusUnauthorized, "missing refresh token")
+		return
+	}
+
+	newAccessToken, err := h.service.RefreshToken(c, refreshToken)
+	if err != nil {
+		helper.Error(c, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	helper.Success(c, newAccessToken, "token refreshed")
 }
 
 func isValidEmail(e string) bool {
