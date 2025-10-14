@@ -17,7 +17,6 @@ func main() {
 	}
 
 	db := config.InitDB()
-
 	application := config.NewApp(db)
 
 	application.Router.GET("/", func(ctx *gin.Context) {
@@ -28,6 +27,8 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+
+	log.Printf("Server running on port %s with CORS enabled", port)
 
 	if err := application.Run(":" + port); err != nil {
 		fmt.Println("FATAL ERROR: Server failed to run:", err)
