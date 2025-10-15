@@ -1,102 +1,89 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen font-sans bg-background">
-    <div class="w-full max-w-sm p-8 space-y-6 bg-white rounded-2xl shadow-xl">
-      
-      <img :src="loginIllustration" alt="Login Illustration" class="w-32 mx-auto mb-6" />
-      
-      <h2 class="text-4xl font-bold text-center text-dark-text">Login</h2>
-
-      <form @submit.prevent="loginUser" class="space-y-5">
-        <div>
-          <label for="email" class="block text-sm font-semibold text-medium-text">Username</label>
-          <input 
-            v-model="email" 
-            id="email" 
-            type="email" 
-            placeholder="Username" 
-            required
-            class="w-full px-4 py-3 mt-1 text-gray-700 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4">
+          <GraduationCap class="w-8 h-8 text-white" />
         </div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Daftar Akun</h1>
+        <p class="text-gray-600">Login</p>
+      </div>
 
-        <div>
-          <label for="password" class="block text-sm font-semibold text-medium-text">Password</label>
+      <form @submit.prevent="handleSubmit" class="space-y-5">
+        <div v-for="field in fields" :key="field.name">
+          <label class="block text-sm font-medium text-gray-700 mb-2">{{ field.label }}</label>
           <div class="relative">
-            <input
-              v-model="password"
-              id="password"
-              :type="showPassword ? 'text' : 'password'"
-              placeholder="Password"
-              required
-              class="w-full px-4 py-3 mt-1 text-gray-700 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            <span class="absolute inset-y-0 right-0 flex items-center pr-4 cursor-pointer" @click="togglePassword">
-              <i :class="showPassword ? 'fa fa-eye-slash' : 'fa fa-eye'" class="text-gray-400"></i>
-            </span>
+            <Input v-model="formData[field.name]" :title="field.title" :place-holder="field.placeholder"
+              :required="true" :id="field.id" :icon="field.icon" :type="field.type" />
           </div>
+          <p v-if="errors[field.name]" class="text-red-500 text-sm mt-1">{{ errors[field.name] }}</p>
         </div>
 
-        <button 
-          type="submit" 
-          class="w-full px-4 py-3 font-bold text-white transition-opacity rounded-lg bg-primary hover:opacity-90"
-        >
-          Login
-        </button>
-
-        <div class="text-sm text-center">
-          <router-link to="/forgot-password" class="font-medium text-medium-text hover:text-primary">Lupa Password?</router-link>
-        </div>
+        <Button :text="isSubmitting ? 'Mendaftar...' : 'Daftar'" :disabled="isSubmitting" variant="modern" size="medium"
+          class="w-full" @click="handleSubmit" />
       </form>
 
-      <p class="pt-4 text-sm text-center text-medium-text">
-        Belum punya akun? 
-        <router-link to="/register" class="font-semibold text-primary hover:underline">Daftar</router-link>
+      <p class="text-center text-gray-600 mt-6">
+        Belum Punya Akun?
+        <router-link to="/login" class="text-indigo-600 font-semibold hover:underline cursor-pointer">
+          Daftar di sini
+        </router-link>
       </p>
-      </div>
+    </div>
+
+    <Toast ref="toastRef" />
   </div>
 </template>
 
-<script>
-// Path sudah diperbaiki dari ../../ menjadi ../../
-import loginIllustration from '../../assets/login-illustration.png';
+<script setup>
+import { onMounted, ref } from 'vue'
+import { Mail, Lock, GraduationCap } from 'lucide-vue-next'
+import Input from '../../components/ui/Input.vue'
+import Button from '../../components/ui/Button.vue'
+import { login } from '../../provider/user.provider'
+import { useLocalStorage } from '../../hooks/useLocalStorage'
+import Toast from '../../components/utils/Toast.vue'
+import { useGetCurrentUser } from '../../hooks/useGetCurrentUser'
 
-export default {
-  name: 'LoginView',
-  data() {
-    return {
-      email: '',
-      password: '',
-      showPassword: false,
-      loginIllustration,
-    };
-  },
-  methods: {
-    togglePassword() {
-      this.showPassword = !this.showPassword;
-    },
-    loginUser() {
-      const dummyStudent = {
-        email: 'mahasiswa@latih.in',
-        password: 'password123',
-      };
-      
-      const dummyLecturer = {
-        email: 'dosen@latih.in',
-        password: 'dosen123',
-      };
+const { setValue: setToken, value: token } = useLocalStorage('token')
+const { setValue: setUser, value  } = useLocalStorage('user')
+const { user } = useGetCurrentUser()
 
-      if (this.email === dummyStudent.email && this.password === dummyStudent.password) {
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userRole', 'mahasiswa');
-        this.$router.push('/');
-      } else if (this.email === dummyLecturer.email && this.password === dummyLecturer.password) {
-        localStorage.setItem('isLoggedIn', 'true');
-        localStorage.setItem('userRole', 'dosen');
-        this.$router.push('/dosen/dashboard');
-      } else {
-        alert('Username atau password yang Anda masukkan salah!');
-      }
-    },
-  },
-};
+const toastRef = ref(null)
+const formData = ref({
+  email: '',
+  password: '',
+})
+const errors = ref({})
+const isSubmitting = ref(false)
+
+const fields = [
+  { id: 1, name: 'email', title: 'Email', type: 'email', placeholder: 'email@example.com', icon: Mail },
+  { id: 2, name: 'password', title: 'Password', type: 'password', placeholder: 'Minimal 6 karakter', icon: Lock },
+]
+
+
+const handleSubmit = async () => {
+  try {
+    isSubmitting.value = true
+    const data = await login(formData.value)
+    console.log(data.data.data)
+    if (data.data.token) {
+      setToken(data.data.token)
+      setUser(data.data.data)
+    }
+
+    toastRef.value.showToast('success', 'Login Berhasil', 'Selamat datang kembali!')
+
+    isSubmitting.value = false
+  } catch (error) {
+    console.log('Something error', error.response?.data)
+
+    toastRef.value.showToast('error', 'Login Gagal', 'Email atau password salah.')
+
+    isSubmitting.value = false
+  }
+}
+console.log(user.value)
+
 </script>
