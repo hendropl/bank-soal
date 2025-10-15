@@ -59,7 +59,6 @@ func GenerateAccessToken(user *model.User) (string, error) {
 	}
 
 	expireAt := time.Now().Add(duration)
-	fmt.Println("DEBUG user id:", user.Id)
 	claims := ClaimsModel{
 		UserId: user.Id,
 		Role:   string(user.Role),
@@ -110,7 +109,6 @@ func GenerateRefreshToken(user *model.User) (string, error) {
 		return "", err
 	}
 
-	fmt.Println("DEBUG refresh token userId:", user.Id)
 	return ss, nil
 }
 
@@ -161,6 +159,5 @@ func ValidateRefreshToken(tokenStr string) (int, error) {
 		return 0, fmt.Errorf("invalid subject format: %w", err)
 	}
 
-	fmt.Println("DEBUG validated userId from refresh token:", id)
 	return id, nil
 }
