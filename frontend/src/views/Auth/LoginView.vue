@@ -57,7 +57,7 @@
 </template>
 
 <script>
-// Pastikan path gambar ini sudah benar
+// Path sudah diperbaiki dari ../../ menjadi ../../
 import loginIllustration from '../../assets/login-illustration.png';
 
 export default {
@@ -80,9 +80,19 @@ export default {
         password: 'password123',
       };
       
+      const dummyLecturer = {
+        email: 'dosen@latih.in',
+        password: 'dosen123',
+      };
+
       if (this.email === dummyStudent.email && this.password === dummyStudent.password) {
         localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userRole', 'mahasiswa');
         this.$router.push('/');
+      } else if (this.email === dummyLecturer.email && this.password === dummyLecturer.password) {
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userRole', 'dosen');
+        this.$router.push('/dosen/dashboard');
       } else {
         alert('Username atau password yang Anda masukkan salah!');
       }
