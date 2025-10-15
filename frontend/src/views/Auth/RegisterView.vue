@@ -1,48 +1,77 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen font-sans bg-background">
-    <div class="relative w-full max-w-sm p-8 space-y-4 text-center bg-white rounded-2xl shadow-xl">
-      
-      <div class="absolute text-2xl text-gray-400 cursor-pointer top-4 right-4 hover:text-gray-700">&times;</div>
-      
-      <img :src="loginIllustration" alt="Latih.in Logo" class="w-20 mx-auto mb-2" />
-      
-      <h2 class="text-3xl font-bold text-dark-text">Akses gratis tanpa batas ke sumber daya kami</h2>
-      <p class="text-medium-text">Daftar untuk melihat lebih banyak</p>
-      
-      <div class="flex flex-col w-full gap-3 pt-4">
-        <button class="w-full py-3 font-semibold text-white transition rounded-lg bg-dark-text hover:opacity-90">
-          Lanjutkan dengan email
-        </button>
-        <button class="flex items-center justify-center w-full gap-3 py-3 font-semibold transition bg-white border border-gray-300 rounded-lg text-medium-text hover:bg-gray-50">
-          <i class="fab fa-facebook-f text-blue-600"></i>
-          <span>Lanjutkan dengan Facebook</span>
-        </button>
-        <button class="flex items-center justify-center w-full gap-3 py-3 font-semibold transition bg-white border border-gray-300 rounded-lg text-medium-text hover:bg-gray-50">
-          <i class="fab fa-google"></i>
-          <span>Lanjutkan dengan Google</span>
-        </button>
+  <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4">
+          <GraduationCap class="w-8 h-8 text-white" />
+        </div>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Daftar Akun</h1>
+        <p class="text-gray-600">Lengkapi data diri Anda untuk mendaftar</p>
       </div>
-      
-      
-      
-      <p class="pt-2 text-sm text-medium-text">
-        Sudah Punya Akun? 
-        <router-link to="/login" class="font-bold underline text-dark-text">Log in</router-link>
+
+      <form @submit.prevent="handleSubmit" class="space-y-5">
+        <div v-for="field in fields" :key="field.name">
+          <label class="block text-sm font-medium text-gray-700 mb-2">{{ field.label }}</label>
+          <div class="relative">
+
+            <Input 
+              :v-model="formData[field.name]"
+              :title="field.title"
+              :place-holder="field.placeholder"
+              :required="true"
+              id=""
+              :icon="field.icon"
+            />
+          </div>
+          <p v-if="errors[field.name]" class="text-red-500 text-sm mt-1">{{ errors[field.name] }}</p>
+        </div>
+        
+        <Button 
+          :text="isSubmitting ? 'Mendaftar...' : 'Daftar'"
+          :disabled="isSubmitting"
+          variant="modern"
+          size="medium"
+          class="w-full"
+          
+        />
+      </form>
+
+      <p class="text-center text-gray-600 mt-6">
+        Sudah punya akun?
+        <router-link to="/login" class="text-indigo-600 font-semibold hover:underline cursor-pointer">
+          Login di sini
+        </router-link>
       </p>
     </div>
   </div>
 </template>
 
-<script>
-// Import ilustrasi ditambahkan kembali di sini
-import loginIllustration from '../../assets/login-illustration.png';
+<script setup>
+import { ref } from 'vue'
+import { Mail, Lock, User, BookOpen, Building2, GraduationCap } from 'lucide-vue-next'
+import Input from '../../components/ui/Input.vue'
+import Button from '../../components/ui/Button.vue'
 
-export default {
-  name: 'RegisterView',
-  data() {
-    return {
-      loginIllustration,
-    };
-  },
-};
+const formData = ref({
+  email: '',
+  password: '',
+  name: '',
+  nim: '',
+  major: '',
+  faculty: ''
+})
+1
+const errors = ref({})
+const isSubmitting = ref(false)
+
+const fields = [
+  { name: 'email', title: 'Email', type: 'email', placeholder: 'email@example.com', icon: Mail },
+  { name: 'password', title: 'Password', type: 'password', placeholder: 'Minimal 6 karakter', icon: Lock },
+  { name: 'name', title: 'Nama Lengkap', type: 'text', placeholder: 'Nama lengkap Anda', icon: User },
+  { name: 'nim', title: 'NIM', type: 'text', placeholder: 'Nomor Induk Mahasiswa', icon: BookOpen },
+  { name: 'major', title: 'Jurusan', type: 'text', placeholder: 'Contoh: Teknik Informatika', icon: GraduationCap },
+  { name: 'faculty', title: 'Fakultas', type: 'text', placeholder: 'Contoh: Fakultas Teknik', icon: Building2 }
+]
+
+const handleSubmit = () => {}
 </script>

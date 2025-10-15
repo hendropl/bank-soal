@@ -8,10 +8,10 @@ import (
 )
 
 type OptionRepository interface {
-	Create(ctx context.Context, o model.Option) (*model.Option, error)
+	Create(ctx context.Context, o model.Option) error
 	GetById(ctx context.Context, id int) (*model.Option, error)
 	GetAll(ctx context.Context, qId int) ([]model.Option, error)
-	Update(ctx context.Context, o model.Option) (*model.Option, error)
+	Update(ctx context.Context, o model.Option, id int) (*model.Option, error)
 	Delete(ctx context.Context, id int) error
 }
 
@@ -23,11 +23,11 @@ func NewOptionRepository(db *gorm.DB) OptionRepository {
 	return &optionRepository{db: db}
 }
 
-func (r *optionRepository) Create(ctx context.Context, o model.Option) (*model.Option, error) {
+func (r *optionRepository) Create(ctx context.Context, o model.Option) error {
 	if err := r.db.WithContext(ctx).Create(&o).Error; err != nil {
-		return nil, err
+		return err
 	}
-	return &o, nil
+	return nil
 }
 
 func (r *optionRepository) GetById(ctx context.Context, id int) (*model.Option, error) {
@@ -48,15 +48,15 @@ func (r *optionRepository) GetAll(ctx context.Context, qId int) ([]model.Option,
 	return o, nil
 }
 
-func (r *optionRepository) Update(ctx context.Context, o model.Option) (*model.Option, error) {
-	if err := r.db.WithContext(ctx).Updates(o).Error; err != nil {
+func (r *optionRepository) Update(ctx context.Context, o model.Option, id int) (*model.Option, error) {
+	if err := r.db.WithContext(ctx).Model(model.Option{}).Where("id = ?", id).Updates(o).Error; err != nil {
 		return nil, err
 	}
 	return &o, nil
 }
 
 func (r *optionRepository) Delete(ctx context.Context, id int) error {
-	if err := r.db.WithContext(ctx).Delete(id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(model.Option{}).Where("id = ?", id).Delete(id).Error; err != nil {
 		return err
 	}
 	return nil

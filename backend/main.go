@@ -9,10 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"latih.in-be/config"
-	"latih.in-be/controller"
-	"latih.in-be/repository"
-	"latih.in-be/route"
-	"latih.in-be/service"
 )
 
 func main() {
@@ -21,20 +17,20 @@ func main() {
 	}
 
 	db := config.InitDB()
+	application := config.NewApp(db)
 
-	userRepo := repository.NewUserRepository(db)
-	userService := service.NewUserService(userRepo)
-	userController := controller.NewUserController(userService)
-
-	r := gin.Default()
-
-	route.UserRoutes(r, userController)
-
-	r.GET("/", func(ctx *gin.Context) {
+	application.Router.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"data": "Hello world"})
 	})
 
-	if err := r.Run(":8080"); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Printf("Server running on port %s with CORS enabled", port)
+
+	if err := application.Run(":" + port); err != nil {
 		fmt.Println("FATAL ERROR: Server failed to run:", err)
 		os.Exit(1)
 	}
