@@ -2,6 +2,7 @@ package helper
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -12,7 +13,7 @@ import (
 )
 
 type ClaimsModel struct {
-	UserID int    `json:"id"`
+	UserId int    `json:"id"`
 	Role   string `json:"role"`
 	Name   string `json:"name"`
 	Email  string `json:"email"`
@@ -41,7 +42,7 @@ func ParseExpiry(s string) (time.Duration, error) {
 	return d, nil
 }
 
-func GenerateToken(user *model.User) (string, error) {
+func GenerateAccessToken(user *model.User) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	expiryStr := os.Getenv("JWT_EXPIRED")
 	if secret == "" {
@@ -49,7 +50,7 @@ func GenerateToken(user *model.User) (string, error) {
 	}
 
 	if expiryStr == "" {
-		expiryStr = "7d"
+		expiryStr = "30m"
 	}
 
 	duration, err := ParseExpiry(expiryStr)
@@ -58,9 +59,9 @@ func GenerateToken(user *model.User) (string, error) {
 	}
 
 	expireAt := time.Now().Add(duration)
-
+	fmt.Println("DEBUG user id:", user.Id)
 	claims := ClaimsModel{
-		UserID: user.Id,
+		UserId: user.Id,
 		Role:   string(user.Role),
 		Name:   user.Name,
 		Email:  user.Email,
@@ -80,16 +81,42 @@ func GenerateToken(user *model.User) (string, error) {
 	return ss, nil
 }
 
-func ParseAndValidateToken(tokenStr string) (*ClaimsModel, error) {
-	secret := os.Getenv("JWT_SECRET")
+func GenerateRefreshToken(user *model.User) (string, error) {
+	secret := os.Getenv("JWT_REFRESH_SECRET")
 	if secret == "" {
-		return nil, errors.New("JWT_SECRET is not set in environment")
+		secret = os.Getenv("JWT_SECRET")
 	}
 
-	token, err := jwt.ParseWithClaims(tokenStr, &ClaimsModel{}, func(t *jwt.Token) (interface{}, error) {
-		if t.Method != jwt.SigningMethodHS256 {
-			return nil, errors.New("unexpected signing method")
-		}
+	expiryStr := os.Getenv("JWT_REFRESH_EXPIRED")
+	if expiryStr == "" {
+		expiryStr = "7d"
+	}
+
+	duration, err := ParseExpiry(expiryStr)
+	if err != nil {
+		return "", err
+	}
+
+	expireAt := time.Now().Add(duration)
+	claims := jwt.RegisteredClaims{
+		Subject:   strconv.Itoa(user.Id),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		ExpiresAt: jwt.NewNumericDate(expireAt),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	ss, err := token.SignedString([]byte(secret))
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println("DEBUG refresh token userId:", user.Id)
+	return ss, nil
+}
+
+func ParseAndValidateToken(tokenString string) (*ClaimsModel, error) {
+	secret := os.Getenv("JWT_SECRET")
+	token, err := jwt.ParseWithClaims(tokenString, &ClaimsModel{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secret), nil
 	})
 	if err != nil {
@@ -98,8 +125,42 @@ func ParseAndValidateToken(tokenStr string) (*ClaimsModel, error) {
 
 	claims, ok := token.Claims.(*ClaimsModel)
 	if !ok || !token.Valid {
-		return nil, errors.New("invalid token")
+		return nil, errors.New("invalid token claims")
 	}
 
 	return claims, nil
+}
+
+func ValidateRefreshToken(tokenStr string) (int, error) {
+	secret := os.Getenv("JWT_REFRESH_SECRET")
+	if secret == "" {
+		secret = os.Getenv("JWT_SECRET")
+	}
+
+	token, err := jwt.ParseWithClaims(tokenStr, &jwt.RegisteredClaims{}, func(t *jwt.Token) (interface{}, error) {
+		if t.Method.Alg() != jwt.SigningMethodHS256.Alg() {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Method.Alg())
+		}
+		return []byte(secret), nil
+	})
+	if err != nil {
+		return 0, fmt.Errorf("error parsing refresh token: %w", err)
+	}
+
+	claims, ok := token.Claims.(*jwt.RegisteredClaims)
+	if !ok || !token.Valid {
+		return 0, errors.New("invalid or expired refresh token")
+	}
+
+	if claims.Subject == "" {
+		return 0, errors.New("missing subject in refresh token")
+	}
+
+	id, err := strconv.Atoi(claims.Subject)
+	if err != nil {
+		return 0, fmt.Errorf("invalid subject format: %w", err)
+	}
+
+	fmt.Println("DEBUG validated userId from refresh token:", id)
+	return id, nil
 }

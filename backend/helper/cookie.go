@@ -12,14 +12,14 @@ var (
 	ErrInvalidValue = errors.New("invalid cookie value")
 )
 
-func Write(c *gin.Context, token string) error {
-	if token == "" {
+func Write(c *gin.Context, refreshToken string) error {
+	if refreshToken == "" {
 		return fmt.Errorf("token cannot be empty")
 	}
 
 	c.SetCookie(
-		"token",
-		token,
+		"refresh_token",
+		refreshToken,
 		3600*24*7,
 		"/",
 		"",
@@ -31,7 +31,7 @@ func Write(c *gin.Context, token string) error {
 }
 
 func Read(c *gin.Context) error {
-	token, err := c.Cookie("token")
+	token, err := c.Cookie("refresh_token")
 	if err != nil {
 		return fmt.Errorf("cookie not found: %w", err)
 	}

@@ -1,14 +1,18 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type Question struct {
 	Id           int        `json:"id" gorm:"primaryKey;autoIncrement;not null"`
-	ExamId       int        `json:"exam_id" gorm:"not null"`
-	CreatorId    int        `json:"creator_id" gorm:"not null"`
+	ExamId       int        `json:"exam_id"`
+	CreatorId    int        `json:"creator_id" gorm:"not null;index"`
 	QuestionText string     `json:"question_text" validate:"required"`
-	Difficulty   Difficulty `json:"difficulty" validate:"oneof=easy medium hard"`
+	Difficulty   Difficulty `json:"difficulty" gorm:"type:enum('easy','medium','hard');not null" validate:"oneof=easy medium hard"`
+	Answer       string     `json:"answer,omitempty"`
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at"`
-	Options      []Option   `json:"options,omitempty" gorm:"foreignKey:QuestionID"`
+
+	Options []Option `json:"options" gorm:"foreignKey:QuestionId;constraint:OnDelete:CASCADE;"`
 }

@@ -2,15 +2,16 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"gorm.io/gorm"
 	"latih.in-be/model"
 )
 
 type ExamRepository interface {
-	Create(ctx context.Context, exam model.Exam) (*model.Exam, error)
+	Create(ctx context.Context, e model.Exam) error
 	GetById(ctx context.Context, id int) (*model.Exam, error)
-	Update(ctx context.Context, exam model.Exam) (*model.Exam, error)
+	Update(ctx context.Context, e model.Exam, id int) (*model.Exam, error)
 	Delete(ctx context.Context, id int) error
 	GetAll(ctx context.Context) ([]model.Exam, error)
 }
@@ -23,40 +24,76 @@ func NewExamRepository(db *gorm.DB) ExamRepository {
 	return &examRepository{db: db}
 }
 
-func (r *examRepository) Create(ctx context.Context, exam model.Exam) (*model.Exam, error) {
-	if err := r.db.WithContext(ctx).Create(&exam).Error; err != nil {
-		return nil, err
+func (r *examRepository) Create(ctx context.Context, e model.Exam) error {
+	if err := r.db.WithContext(ctx).Create(&e).Error; err != nil {
+		return err
 	}
-	return &exam, nil
+	return nil
 }
 
 func (r *examRepository) GetById(ctx context.Context, id int) (*model.Exam, error) {
-	exam := model.Exam{}
+	e := model.Exam{}
 
-	if err := r.db.WithContext(ctx).First(&exam, id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(model.Exam{}).First(e, id).Error; err != nil {
 		return nil, err
 	}
-	return &exam, nil
+	return &e, nil
 }
 
-func (r *examRepository) Update(ctx context.Context, exam model.Exam) (*model.Exam, error) {
-	if err := r.db.WithContext(ctx).Updates(exam).Error; err != nil {
+func (r *examRepository) Update(ctx context.Context, e model.Exam, id int) (*model.Exam, error) {
+	updateData := map[string]interface{}{}
+
+	if e.CreatorId != 0 {
+		updateData["creator_id"] = e.CreatorId
+	}
+	if e.Description != "" {
+		updateData["description"] = e.Description
+	}
+	if e.Difficulty != "" {
+		updateData["difficulty"] = e.Difficulty
+	}
+	if e.StartedAt == nil || e.StartedAt.IsZero() {
+		updateData["started_at"] = e.StartedAt
+	}
+	if e.FinishedAt == nil || e.FinishedAt.IsZero() {
+		updateData["finished_at"] = e.FinishedAt
+	}
+	if e.LongTime != 0 {
+		updateData["long_time"] = e.LongTime
+	}
+	if e.Title != "" {
+		updateData["title"] = e.Title
+	}
+
+	if len(updateData) == 0 {
+		return nil, fmt.Errorf("no fields to update")
+	}
+
+	if err := r.db.WithContext(ctx).
+		Model(&model.Exam{}).
+		Where("id = ?", id).
+		Updates(updateData).Error; err != nil {
 		return nil, err
 	}
-	return &exam, nil
+
+	var updated model.Exam
+	if err := r.db.WithContext(ctx).First(&updated, id).Error; err != nil {
+		return nil, err
+	}
+	return &updated, nil
 }
 
 func (r *examRepository) Delete(ctx context.Context, id int) error {
-	if err := r.db.WithContext(ctx).Delete(id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Model(model.Exam{}).Where("id = ?", id).Delete(id).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
 func (r *examRepository) GetAll(ctx context.Context) ([]model.Exam, error) {
-	var exams []model.Exam
-	if err := r.db.WithContext(ctx).Find(&exams).Error; err != nil {
+	var e []model.Exam
+	if err := r.db.WithContext(ctx).Find(&e).Error; err != nil {
 		return nil, err
 	}
-	return exams, nil
+	return e, nil
 }
