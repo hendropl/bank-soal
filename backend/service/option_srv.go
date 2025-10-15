@@ -9,9 +9,9 @@ import (
 )
 
 type OptionService interface {
-	Create(ctx context.Context, data model.Option) (*model.Option, error)
+	Create(ctx context.Context, data model.Option) error
 	GetById(ctx context.Context, id int) (*model.Option, error)
-	Update(ctx context.Context, data model.Option) (*model.Option, error)
+	Update(ctx context.Context, data model.Option, id int) (*model.Option, error)
 	Delete(ctx context.Context, id int) error
 	GetAll(ctx context.Context, qId int) ([]model.Option, error)
 }
@@ -26,17 +26,17 @@ func NewOptionService(repo repository.OptionRepository) OptionService {
 	}
 }
 
-func (s *optionService) Create(ctx context.Context, data model.Option) (*model.Option, error) {
+func (s *optionService) Create(ctx context.Context, data model.Option) error {
 	if data.QuestionId == 0 {
-		return nil, fmt.Errorf("questionId is required")
+		return fmt.Errorf("questionId is required")
 	}
 
-	createdData, err := s.repo.Create(ctx, data)
+	err := s.repo.Create(ctx, data)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create option: %w", err)
+		return fmt.Errorf("failed to create option: %w", err)
 	}
 
-	return createdData, nil
+	return nil
 }
 
 func (s *optionService) GetById(ctx context.Context, id int) (*model.Option, error) {
@@ -47,8 +47,8 @@ func (s *optionService) GetById(ctx context.Context, id int) (*model.Option, err
 	return data, nil
 }
 
-func (s *optionService) Update(ctx context.Context, data model.Option) (*model.Option, error) {
-	updatedData, err := s.repo.Update(ctx, data)
+func (s *optionService) Update(ctx context.Context, data model.Option, id int) (*model.Option, error) {
+	updatedData, err := s.repo.Update(ctx, data, id)
 	if err != nil {
 		return nil, fmt.Errorf("update failed: %w", err)
 	}
