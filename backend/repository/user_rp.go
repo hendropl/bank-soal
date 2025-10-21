@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 	"latih.in-be/model"
 )
-
+// jjj
 type UserRepository interface {
 	Register(ctx context.Context, user model.User) (*model.User, error)
 	GetById(ctx context.Context, id int) (*model.User, error)
