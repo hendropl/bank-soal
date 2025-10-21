@@ -38,6 +38,9 @@
 <script setup>
 import { ref } from 'vue'
 import { Mail, Lock, User, BookOpen, Building2, GraduationCap } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 import Input from '../../components/ui/Input.vue'
 import Button from '../../components/ui/Button.vue'
 import { register } from '../../provider/user.provider'
@@ -72,6 +75,11 @@ const handleSubmit = async () => {
     console.log('Response:', data.data)
 
     toastRef.value.showToast('success', 'Registrasi Berhasil', 'Akun Anda berhasil dibuat!')
+    
+    // Redirect to login page after successful registration
+    setTimeout(() => {
+      router.push('/login')
+    }, 1500)
 
     isSubmitting.value = false
   } catch (error) {

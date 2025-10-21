@@ -1,8 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router' // tambahkan ini
-import './style.css'
+import router from './router'
+import './style.css' // <-- Pastikan baris ini ada
 
-const app = createApp(App)
-app.use(router) // gunakan router
-app.mount('#app')
+createApp(App).use(router).mount('#app')

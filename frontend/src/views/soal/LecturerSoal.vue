@@ -9,7 +9,7 @@
 
 <script>
 // Hanya mengimpor komponen yang dibutuhkan halaman ini
-import SoalManagement from '../../components/SoalManagement.vue';
+import SoalManagement from './components/SoalManagement.vue';
 
 export default {
   name: 'LecturerSoal',

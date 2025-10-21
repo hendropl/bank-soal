@@ -7,7 +7,7 @@ export const register = async (data) => {
 }
 
 export const login = async (data) => {
-  const res = await ApiHandler.post(`/${USER}/login`, data)
+  const res = await ApiHandler.post(`${USER}/login`, data)
   return res
 }
 

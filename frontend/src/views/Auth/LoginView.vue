@@ -5,8 +5,8 @@
         <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4">
           <GraduationCap class="w-8 h-8 text-white" />
         </div>
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">Daftar Akun</h1>
-        <p class="text-gray-600">Login</p>
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Login</h1>
+        <p class="text-gray-600">Masuk ke akun Anda</p>
       </div>
 
       <form @submit.prevent="handleSubmit" class="space-y-5">
@@ -19,13 +19,13 @@
           <p v-if="errors[field.name]" class="text-red-500 text-sm mt-1">{{ errors[field.name] }}</p>
         </div>
 
-        <Button :text="isSubmitting ? 'Mendaftar...' : 'Daftar'" :disabled="isSubmitting" variant="modern" size="medium"
+        <Button :text="isSubmitting ? 'Masuk...' : 'Masuk'" :disabled="isSubmitting" variant="modern" size="medium"
           class="w-full" @click="handleSubmit" />
       </form>
 
       <p class="text-center text-gray-600 mt-6">
         Belum Punya Akun?
-        <router-link to="/login" class="text-indigo-600 font-semibold hover:underline cursor-pointer">
+        <router-link to="/register" class="text-indigo-600 font-semibold hover:underline cursor-pointer">
           Daftar di sini
         </router-link>
       </p>
@@ -38,6 +38,9 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { Mail, Lock, GraduationCap } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 import Input from '../../components/ui/Input.vue'
 import Button from '../../components/ui/Button.vue'
 import { login } from '../../provider/user.provider'
@@ -71,15 +74,28 @@ const handleSubmit = async () => {
     if (data.data.token) {
       setToken(data.data.token)
       setUser(data.data.data)
+      
+      // Redirect based on user role
+      const userRole = data.data.data.role
+      const redirectPath = userRole === 'dosen' ? '/dosen/dashboard' : '/'
+      
+      toastRef.value.showToast('success', 'Login Berhasil', 'Selamat datang kembali!')
+      
+      setTimeout(() => {
+        router.push(redirectPath)
+      }, 1500)
     }
-
-    toastRef.value.showToast('success', 'Login Berhasil', 'Selamat datang kembali!')
 
     isSubmitting.value = false
   } catch (error) {
-    console.log('Something error', error.response?.data)
+    console.log('Login error:', error.response?.data)
+    
+    let errorMessage = 'Email atau password salah.'
+    if (error.response?.data?.message) {
+      errorMessage = error.response.data.message
+    }
 
-    toastRef.value.showToast('error', 'Login Gagal', 'Email atau password salah.')
+    toastRef.value.showToast('error', 'Login Gagal', errorMessage)
 
     isSubmitting.value = false
   }

@@ -16,12 +16,12 @@ import StudentProfilePage from '../views/StudentProfilePage.vue'
 
 // Halaman Dosen
 import LecturerDashboard from '../views/dosen/LecturerDashboard.vue'
-import LecturerSoalList from '../views/dosen/LecturerSoalList.vue'
-import CreateSoal from '../views/dosen/CreateSoal.vue'
-import CreateManualSoal from '../views/dosen/CreateManualSoal.vue'
-import UploadJsonSoal from '../views/dosen/UploadJsonSoal.vue'
+import LecturerSoalList from '../views/soal/LecturerSoalList.vue'
+import CreateSoal from '../views/soal/CreateSoal.vue'
+import CreateManualSoal from '../views/soal/CreateManualSoal.vue'
+import UploadJsonSoal from '../views/soal/UploadJsonSoal.vue'
 import LecturerProfilePage from '../views/dosen/LecturerProfilePage.vue'
-import LecturerSoal from '../views/dosen/LecturerSoal.vue'
+import LecturerSoal from '../views/soal/LecturerSoal.vue'
 
 const routes = [
   // --- Rute Umum & Mahasiswa ---
