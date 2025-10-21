@@ -10,13 +10,15 @@ const ApiHandler = axios.create({
 ApiHandler.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`
+    const skipAuth = config.url.includes('/login') || config.url.includes('/refresh');
+    if (token && !skipAuth) {
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
-    return config
+    return config;
   },
   (error) => Promise.reject(error)
-)
+);
+
 
 ApiHandler.interceptors.response.use(
   (response) => {
