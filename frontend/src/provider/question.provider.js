@@ -7,7 +7,7 @@ export const getAllQuestions = async () => {
   return res.data;
 };
 
-// Fungsi untuk membuat soal baru dengan pilihan jawaban
+// Fungsi untuk membuat soal
 export const createQuestionWithOptions = async (data) => {
   // Menggunakan endpoint {{baseUrl}}/question/options
   const res = await ApiHandler.post('/question/options', data);
